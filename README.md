@@ -6,6 +6,8 @@ Harbour is an independently developed public-benefits navigator. It turns a pers
 
 Repository: <https://github.com/jawaharlaldoon-bit/Harbour>
 
+Live demo: <https://harbour-benefits-navigator.onrender.com>
+
 ## What Harbour does
 
 - Accepts typed or browser-transcribed descriptions in multiple languages.
