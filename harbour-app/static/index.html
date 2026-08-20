@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harbour — From uncertainty to a clear next step.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,500;9..144,0,600;9..144,1,400;9..144,1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+@keyframes harbourRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes harbourFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes harbourRipple{0%{transform:scale(.85);opacity:.5}100%{transform:scale(1.9);opacity:0}}
+@keyframes harbourBreathe{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.06);opacity:.85}}
+@keyframes harbourPulse{0%{box-shadow:0 0 0 0 rgba(217,115,90,.4)}70%{box-shadow:0 0 0 14px rgba(217,115,90,0)}100%{box-shadow:0 0 0 0 rgba(217,115,90,0)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scrollbar-gutter:stable;overflow-y:scroll;}
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  color:#0F3A3D;
+  background:linear-gradient(180deg,#FBFAF7 0%,#F3EFE7 55%,#ECE5D8 100%);
+  min-height:100vh;
+}
+textarea,input{font-family:'Plus Jakarta Sans',sans-serif;}
+textarea::placeholder,input::placeholder{color:rgba(20,52,47,.45);}
+::selection{background:rgba(27,122,126,.2);}
+
+/* ─ NAV ─ */
+#topnav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 22px;
+  background:rgba(255,255,255,.75);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(20,52,47,.1);
+}
+#topnav .brand{display:flex;align-items:center;gap:9px;}
+#topnav .brand .name{font-family:'Fraunces',serif;font-weight:500;font-size:22px;letter-spacing:-.5px;color:#0B3D37;}
+#topnav .worldbtns{display:flex;gap:4px;padding:4px;background:rgba(11,61,55,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(20,52,47,.18);border-radius:999px;box-shadow:0 8px 24px rgba(11,61,55,.3);}
+#topnav .worldbtns button{
+  border:none;cursor:pointer;font-family:'Plus Jakarta Sans';font-weight:700;font-size:12px;letter-spacing:.3px;
+  padding:7px 15px;border-radius:999px;background:transparent;color:rgba(255,255,255,.75);transition:all .2s;
+}
+#topnav .worldbtns button.active{background:#FBFAF7;color:#0B3D37;}
+
+/* ─ WORLD CONTAINERS ─ */
+#world-person,#world-org,#world-cw{display:none;}
+#world-person.active{display:block;}
+#world-org.active,#world-cw.active{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:90px 20px 48px;background:linear-gradient(180deg,#FBFAF7 0%,#F3EFE7 55%,#ECE5D8 100%);}
+
+/* ─ PERSON SCREENS ─ */
+#person-screens{
+  min-height:100vh;
+  background:linear-gradient(180deg,#FBFAF7 0%,#F3EFE7 55%,#ECE5D8 100%);
+  padding:clamp(80px,8vw,96px) 20px 130px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.pscreen{display:none;width:100%;max-width:560px;animation:harbourRise .45s ease forwards;}
+.pscreen.active{display:block;}
+
+/* ─ PROGRESS & MAP tabs ─ */
+#tab-progress-content,#tab-map-content{display:none;width:100%;max-width:480px;animation:harbourRise .45s ease forwards;}
+#tab-progress-content.active,#tab-map-content.active{display:block;}
+
+/* ─ CARDS ─ */
+.card-white{background:#ffffff;border:1px solid rgba(20,52,47,.18);border-radius:20px;padding:22px;box-shadow:0 16px 40px rgba(8,42,38,.08);}
+.card-sand{background:#F4F1EA;border:1px solid rgba(20,52,47,.15);border-radius:20px;padding:22px;}
+
+/* ─ FORM ELEMENTS ─ */
+.harbour-input{
+  width:100%;border:1px solid rgba(20,52,47,.22);background:#F4F1EA;
+  border-radius:13px;padding:13px 15px;font-size:15px;color:#14342F;outline:none;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+.harbour-input:focus{border-color:#1B7A7E;}
+textarea.harbour-input{resize:none;}
+
+.harbour-btn{
+  width:100%;border:none;cursor:pointer;font-family:'Plus Jakarta Sans';font-weight:700;
+  font-size:16px;padding:15px;border-radius:13px;transition:all .2s;
+}
+.harbour-btn.primary{background:#E8A04C;color:#0B3D37;box-shadow:0 12px 30px rgba(232,160,76,.34);}
+.harbour-btn.primary:hover{transform:translateY(-2px);}
+.harbour-btn.primary:disabled{background:rgba(20,52,47,.12);color:rgba(20,52,47,.4);box-shadow:none;cursor:not-allowed;transform:none;}
+.harbour-btn.ghost{background:#F4F1EA;color:#0F3A3D;border:1px solid rgba(20,52,47,.28);}
+.harbour-btn.ghost:hover{background:#EAE5DC;}
+.harbour-btn.sm{padding:11px 20px;width:auto;font-size:14px;}
+
+/* ─ CHIPS / PILLS ─ */
+.chip-group{display:flex;flex-wrap:wrap;gap:11px;margin-bottom:24px;}
+.need-btn,.urg-btn{
+  display:inline-flex;align-items:center;gap:9px;
+  border:1.5px solid rgba(20,52,47,.22);background:#ffffff;color:#0F3A3D;
+  cursor:pointer;font-family:'Plus Jakarta Sans';font-weight:700;font-size:15px;
+  padding:11px 18px;border-radius:999px;transition:all .15s;
+}
+.need-btn.sel,.urg-btn.sel{background:#E8A04C;border-color:#E8A04C;color:#0B3D37;}
+.urg-btn{flex:1;min-width:130px;justify-content:center;border-radius:13px;padding:14px;}
+
+/* ─ LABELS ─ */
+.harbour-label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(20,52,47,.85);margin-bottom:12px;display:block;}
+.harbour-sublabel{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#1B7A7E;margin-bottom:8px;display:block;}
+
+/* ─ PROGRESS STEPPER ─ */
+.stepper{display:flex;align-items:flex-start;margin-bottom:16px;}
+.stepper .ph{display:flex;flex-direction:column;align-items:center;flex:1;position:relative;}
+.stepper .ph .line{position:absolute;top:14px;right:50%;width:100%;height:2px;background:rgba(20,52,47,.18);}
+.stepper .ph.done .line{background:#1B7A7E;}
+.stepper .ph .dot{position:relative;z-index:1;width:30px;height:30px;border-radius:50%;border:2px solid rgba(20,52,47,.3);background:#F4F1EA;color:rgba(20,52,47,.5);display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;}
+.stepper .ph.done .dot{background:#1B7A7E;border-color:#1B7A7E;color:#fff;}
+.stepper .ph.cur .dot{background:#fff;border-color:#1B7A7E;color:#1B7A7E;}
+.stepper .ph span.lbl{margin-top:8px;font-size:11px;font-weight:700;color:rgba(20,52,47,.5);}
+.stepper .ph.done span.lbl,.stepper .ph.cur span.lbl{color:#0F3A3D;}
+
+/* ─ PLAN CARDS ─ */
+.res-card{background:#ffffff;border:1px solid rgba(20,52,47,.22);border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 16px 40px rgba(8,42,38,.08);}
+.res-rank{flex:none;width:30px;height:30px;border-radius:9px;background:#1B7A7E;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:16px;}
+.res-why{display:none;font-size:13px;line-height:1.55;color:rgba(20,52,47,.9);margin-top:12px;padding-top:12px;border-top:1px solid rgba(20,52,47,.12);}
+.res-why.open{display:block;}
+.readability-badge{font-size:11px;color:#1B7A7E;margin-top:6px;font-weight:600;}
+.stale-warn{font-size:11px;color:#D9735A;font-weight:700;margin-top:6px;display:flex;align-items:center;gap:5px;}
+
+/* ─ ROUTE BANNER ─ */
+.route-banner{border-radius:13px;padding:14px 16px;margin-bottom:18px;font-size:13.5px;line-height:1.5;}
+.route-banner.emergency{background:#FDF0EC;border:1px solid rgba(217,115,90,.35);color:#8A3D22;}
+.route-banner.fair{background:#E8F5F0;border:1px solid rgba(27,122,126,.3);color:#0F3A3D;}
+.route-banner .rt{font-weight:800;font-size:14px;margin-bottom:4px;display:flex;align-items:center;gap:7px;}
+
+/* ─ CONF BAR ─ */
+.conf-track{width:100%;height:9px;border-radius:999px;background:rgba(20,52,47,.14);overflow:hidden;margin-bottom:22px;}
+.conf-fill{height:100%;border-radius:999px;background:#E8A04C;transition:width .6s;}
+
+/* ─ KPI GRID ─ */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px;}
+@media(max-width:480px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+.kpi-box{background:#F4F1EA;border:1px solid rgba(20,52,47,.15);border-radius:13px;padding:14px 10px;text-align:center;}
+.kpi-box b{font-family:'Fraunces',serif;font-weight:600;font-size:22px;color:#0F3A3D;display:block;line-height:1;}
+.kpi-box small{font-size:11px;color:rgba(20,52,47,.7);margin-top:6px;display:block;}
+
+/* ─ EQUITY BARS ─ */
+.eq-bar{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.eq-bar .nm{flex:none;width:68px;font-size:12.5px;color:rgba(20,52,47,.85);}
+.eq-bar .tk{flex:1;height:9px;border-radius:999px;background:rgba(20,52,47,.12);overflow:hidden;}
+.eq-bar .tk i{display:block;height:100%;background:#1B7A7E;border-radius:999px;}
+.eq-bar .pct{flex:none;width:36px;text-align:right;font-size:12px;font-weight:700;color:#0F3A3D;}
+
+/* ─ MILP ─ */
+.milp-cols{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+.milp-side{flex:1;min-width:180px;border-radius:16px;padding:16px;}
+.milp-side.L{background:rgba(217,115,90,.1);border:1px solid rgba(217,115,90,.3);}
+.milp-side.R{background:rgba(27,122,126,.1);border:1px solid rgba(27,122,126,.3);}
+.milp-side .mh{font-size:11px;letter-spacing:.8px;text-transform:uppercase;font-weight:800;margin-bottom:12px;}
+.milp-side.L .mh{color:#A04030;} .milp-side.R .mh{color:#1B7A7E;}
+.milp-ppl{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.milp-sq{width:20px;height:20px;border-radius:4px;}
+.milp-gap{font-family:'Fraunces',serif;font-weight:600;font-size:21px;}
+.milp-side.L .milp-gap{color:#C05040;} .milp-side.R .milp-gap{color:#1B7A7E;}
+
+/* ─ CW QUEUE ROW ─ */
+.cw-row{display:flex;align-items:flex-start;gap:14px;background:#F4F1EA;border:1.5px solid rgba(20,52,47,.15);border-radius:16px;padding:16px 18px;margin-bottom:12px;}
+.cw-badge{flex:none;width:50px;height:50px;border-radius:12px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;}
+.cw-badge .cb1{font-weight:800;font-size:14px;} .cw-badge .cb2{font-size:11px;opacity:.9;}
+.cw-main{flex:1;min-width:0;}
+.cw-main h4{font-weight:700;font-size:15px;color:#0F3A3D;line-height:1.35;margin-bottom:4px;}
+.cw-main .meta{font-size:12.5px;color:rgba(20,52,47,.6);margin-bottom:9px;}
+.cw-tag{display:inline-block;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;}
+
+/* ─ BOTTOM NAV ─ */
+#bottomnav{
+  position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:70;
+  display:flex;gap:4px;
+  background:rgba(255,255,255,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(20,52,47,.18);border-radius:20px;padding:8px;
+  box-shadow:0 12px 30px rgba(8,42,38,.15);
+}
+#bottomnav button{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  border:none;background:none;cursor:pointer;padding:8px 18px;border-radius:14px;
+  color:rgba(20,52,47,.45);font-family:'Plus Jakarta Sans';font-size:11px;font-weight:700;
+  transition:all .2s;
+}
+#bottomnav button.active{color:#E8A04C;}
+
+/* ─ CHAT FAB ─ */
+#chat-fab{
+  position:fixed;right:18px;bottom:24px;z-index:91;
+  width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;
+  background:#E8A04C;box-shadow:0 12px 30px rgba(232,160,76,.45);
+  display:none;align-items:center;justify-content:center;transition:transform .15s;
+}
+#chat-fab:hover{transform:translateY(-2px);}
+.person-active #chat-fab{display:flex;}
+#chat-panel{
+  position:fixed;right:18px;bottom:90px;z-index:90;
+  width:min(340px,calc(100vw - 36px));height:min(520px,calc(100vh - 130px));
+  display:none;flex-direction:column;background:#FBFAF7;border-radius:18px;overflow:hidden;
+  box-shadow:0 24px 60px rgba(8,42,38,.2);
+}
+#chat-panel.open{display:flex;}
+#chat-head{display:flex;align-items:center;justify-content:space-between;background:#0B3D37;padding:15px 18px;}
+#chat-head span{font-weight:700;font-size:16px;color:#fff;}
+#chat-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
+.chat-msg-bot{align-self:flex-start;background:#D4E9E8;color:#0B3D37;border-radius:14px 14px 14px 4px;padding:11px 14px;font-size:14px;line-height:1.5;max-width:84%;}
+.chat-msg-me{align-self:flex-end;background:#1B7A7E;color:#fff;border-radius:14px 14px 4px 14px;padding:11px 14px;font-size:14px;line-height:1.5;max-width:84%;}
+#chat-chips{display:flex;flex-wrap:nowrap;gap:8px;padding:0 14px 12px;overflow-x:auto;scrollbar-width:none;}
+#chat-chips::-webkit-scrollbar{display:none;}
+#chat-chips button{flex:none;border:1.5px solid #1B7A7E;background:#fff;color:#1B7A7E;cursor:pointer;font-family:'Plus Jakarta Sans';font-weight:600;font-size:12.5px;padding:8px 13px;border-radius:999px;}
+#chat-chips button:hover{background:#D4E9E8;}
+#chat-form{display:flex;align-items:center;gap:10px;border-top:1px solid rgba(20,52,47,.12);padding:12px 14px;background:#fff;}
+#chat-in{flex:1;min-width:0;border:none;outline:none;font-size:14px;color:#14342F;background:transparent;font-family:'Plus Jakarta Sans';}
+#chat-send{flex:none;width:38px;height:38px;border-radius:10px;border:none;cursor:pointer;background:#1B7A7E;display:inline-flex;align-items:center;justify-content:center;}
+
+/* ─ LOGIN CARDS ─ */
+.login-card{
+  width:100%;max-width:400px;background:#FBFAF7;border-radius:24px;
+  padding:clamp(28px,5vw,40px);box-shadow:0 30px 70px rgba(0,0,0,.18);
+  animation:harbourRise .45s ease forwards;color:#14342F;
+}
+.login-card .lc-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:#1B7A7E;margin-bottom:8px;}
+.login-card h2{font-family:'Fraunces',serif;font-weight:500;font-size:28px;color:#0B3D37;letter-spacing:-.5px;margin-bottom:8px;}
+.login-card p{font-size:14px;line-height:1.55;color:#6B7C79;margin-bottom:26px;}
+.login-card label{display:block;font-size:12px;font-weight:700;color:#0B3D37;margin-bottom:6px;letter-spacing:.3px;}
+.login-card input{width:100%;border:1.5px solid #DBE7E2;border-radius:12px;padding:13px 15px;font-size:15px;color:#14342F;outline:none;background:#fff;margin-bottom:16px;font-family:'Plus Jakarta Sans';}
+.login-card input:focus{border-color:#1B7A7E;}
+.login-card .lc-btn{width:100%;border:none;cursor:pointer;font-family:'Plus Jakarta Sans';font-weight:700;font-size:16px;color:#0F3A3D;background:#E8A04C;padding:15px;border-radius:13px;box-shadow:0 12px 26px rgba(232,160,76,.32);}
+
+/* ─ ORG / CW DASH ─ */
+.dash-wrap{width:100%;max-width:1020px;animation:harbourRise .45s ease forwards;padding:90px 20px 60px;}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:18px;}
+@media(max-width:480px){.dash-grid{grid-template-columns:1fr;}}
+.dash-card{background:#ffffff;border:1px solid rgba(20,52,47,.18);border-radius:22px;padding:24px;box-shadow:0 16px 40px rgba(8,42,38,.08);}
+.dash-card h3{font-family:'Fraunces',serif;font-weight:600;font-size:22px;color:#0F3A3D;letter-spacing:-.3px;margin-bottom:6px;}
+.dash-card p{font-size:13.5px;line-height:1.5;color:rgba(20,52,47,.72);margin-bottom:18px;}
+
+/* ─ MAPS ─ */
+#organization-map{height:280px;border-radius:16px;overflow:hidden;margin-bottom:14px;border:1px solid rgba(20,52,47,.15);}
+#pmap{height:300px;border-radius:16px;overflow:hidden;margin-top:8px;border:1px solid rgba(20,52,47,.15);}
+
+/* ─ SPINNER / NOTICES ─ */
+.spinner{text-align:center;color:rgba(20,52,47,.5);font-size:13px;padding:20px;}
+.harbour-ok{background:#E8F5F0;border:1px solid rgba(27,122,126,.3);border-radius:12px;padding:12px 16px;font-size:13px;font-weight:600;color:#0F5A4E;margin-top:10px;}
+.harbour-err{background:#FDECEA;border:1px solid rgba(217,115,90,.3);border-radius:12px;padding:12px 16px;font-size:13px;font-weight:600;color:#8A3D22;margin-top:10px;}
+.harbour-warn{background:rgba(232,160,76,.15);border:1px solid rgba(232,160,76,.38);border-radius:14px;padding:14px 18px;font-size:14px;line-height:1.5;color:#8A5A1F;margin-bottom:22px;}
+
+h1.hero{font-family:'Fraunces',serif;font-weight:500;font-size:48px;letter-spacing:-1px;margin-bottom:10px;color:#0F3A3D;}
+h2.screen-h{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(30px,4.5vw,40px);line-height:1.08;letter-spacing:-.8px;margin-bottom:10px;color:#0F3A3D;}
+
+/* ═══════════ RESPONSIVE — MOBILE ≤ 640px ═══════════ */
+@media(max-width:640px){
+
+  /* TOP NAV → 2 rows: [brand · lang] / [worldbtns full-width] */
+  #topnav{flex-wrap:wrap;padding:10px 14px 8px;gap:4px;}
+  #topnav .brand .name{font-size:18px;}
+  #topnav .worldbtns{order:10;width:100%;justify-content:center;}
+  #topnav .worldbtns button{padding:6px 10px;font-size:10.5px;letter-spacing:.2px;}
+  .lang-btns{margin-left:auto;}
+  .lang-btns button{font-size:11px;padding:5px 8px;}
+
+  /* PERSON SCREENS: extra top padding for 2-row nav (~95px tall) */
+  #person-screens{
+    padding-top:110px;
+    padding-left:16px;
+    padding-right:16px;
+    padding-bottom:130px;
+  }
+
+  /* ORG + CW WORLDS */
+  #world-org.active,#world-cw.active{
+    padding:110px 14px 48px;
+    align-items:flex-start;
+  }
+  .dash-wrap{padding-top:0;padding-left:0;padding-right:0;}
+  .dash-grid{grid-template-columns:1fr;}
+
+  /* TYPOGRAPHY */
+  h1.hero{font-size:32px;letter-spacing:-.5px;}
+  h2.screen-h{font-size:26px;}
+
+  /* URGENCY BUTTONS */
+  .urg-btn{min-width:0;font-size:14px;padding:12px 8px;}
+
+  /* CHIPS */
+  .need-btn{font-size:14px;padding:10px 14px;}
+
+  /* BOTTOM NAV → full-width tab bar at bottom */
+  #bottomnav{
+    left:0;right:0;bottom:0;
+    transform:none;
+    border-radius:20px 20px 0 0;
+    border-bottom:none;
+    justify-content:space-around;
+    padding:8px 4px max(env(safe-area-inset-bottom,0px),8px);
+    gap:0;
+  }
+  #bottomnav button{flex:1;padding:8px 4px;}
+
+  /* CHAT FAB → above full-width bottom nav */
+  #chat-fab{bottom:88px;right:14px;}
+
+  /* CHAT PANEL → full width */
+  #chat-panel{
+    left:8px;right:8px;
+    bottom:80px;
+    width:auto;
+    height:min(500px,calc(100vh - 165px));
+  }
+
+  /* CW ROWS */
+  .cw-badge{width:42px;height:42px;border-radius:10px;}
+  .cw-badge .cb1{font-size:12px;} .cw-badge .cb2{font-size:10px;}
+
+  /* MAPS */
+  #pmap{height:240px;}
+  #organization-map{height:210px;}
+}
+</style>
+<style>
+/* ─ hide Google's injected banner and tooltip entirely ─ */
+.goog-te-banner-frame,iframe.goog-te-banner-frame,#goog-gt-tt,.goog-te-balloon-frame,.goog-tooltip,.goog-tooltip-card{display:none!important;}
+.goog-te-gadget{display:none!important;}
+body{top:0!important;margin-top:0!important;}
+/* ─ lang buttons ─ */
+.lang-btns{display:inline-flex;gap:3px;background:rgba(20,52,47,.08);border-radius:10px;padding:3px;}
+.lang-btns button{border:none;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:rgba(20,52,47,.55);cursor:pointer;padding:5px 9px;border-radius:7px;transition:background .15s,color .15s;letter-spacing:.3px;}
+.lang-btns button.active{background:#ffffff;color:#0F3A3D;box-shadow:0 1px 4px rgba(20,52,47,.12);}
+</style>
+</head>
+<body>
+<div id="google_translate_element" style="display:none;"></div>
+<script>
+function googleTranslateElementInit(){
+  new google.translate.TranslateElement({pageLanguage:'en',includedLanguages:'en,es,fr',autoDisplay:false},'google_translate_element');
+}
+function setLang(lang,btn){
+  document.querySelectorAll('.lang-btns button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(lang==='en'){
+    document.cookie='googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie='googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain='+location.hostname+';';
+    location.reload();
+    return;
+  }
+  const sel=document.querySelector('.goog-te-combo');
+  if(sel){sel.value=lang;sel.dispatchEvent(new Event('change'));}
+}
+/* kill Google Translate banner reliably — interval wins over any reinjection */
+setInterval(()=>{
+  document.querySelectorAll('.goog-te-banner-frame,iframe.goog-te-banner-frame,.skiptranslate').forEach(el=>{if(el.tagName!=='DIV'||!el.id)el.style.setProperty('display','none','important');});
+  if(document.body&&document.body.style.top&&document.body.style.top!=='0px')document.body.style.setProperty('top','0','important');
+},50);
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+
+<!-- ════ TOP NAV ════ -->
+<nav id="topnav">
+  <div class="brand">
+    <svg viewBox="0 0 72 72" fill="none" width="28" height="28">
+      <path d="M36 8 A28 28 0 1 1 18 16" stroke="#1B7A7E" stroke-width="5" stroke-linecap="round" fill="none" opacity=".95"/>
+      <path d="M18 16 L34 32 L48 26 L62 40" stroke="#E8A04C" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="62" cy="40" r="5" fill="#E8A04C"/>
+    </svg>
+    <span class="name">Harbour</span>
+  </div>
+  <div class="worldbtns">
+    <button id="btn-person" class="active" onclick="setWorld('person')">Person</button>
+    <button id="btn-org" onclick="setWorld('org')">Organization</button>
+    <button id="btn-cw" onclick="setWorld('cw')">Caseworker</button>
+  </div>
+  <div class="lang-btns">
+    <button class="active" onclick="setLang('en',this)">EN</button>
+    <button onclick="setLang('es',this)">ES</button>
+    <button onclick="setLang('fr',this)">FR</button>
+  </div>
+</nav>
+
+<!-- ════ PERSON WORLD ════ -->
+<div id="world-person" class="active person-active">
+  <div id="person-screens">
+
+    <!-- ─ START ─ -->
+    <div class="pscreen active" id="scr-start">
+      <div style="text-align:center;max-width:520px;">
+        <div style="position:relative;width:130px;height:130px;margin:0 auto 30px;">
+          <span style="position:absolute;inset:0;border-radius:50%;border:2px solid rgba(232,160,76,.5);animation:harbourRipple 3s ease-out infinite;"></span>
+          <span style="position:absolute;inset:0;border-radius:50%;border:2px solid rgba(232,160,76,.5);animation:harbourRipple 3s ease-out infinite 1.5s;"></span>
+          <svg viewBox="0 0 72 72" fill="none" style="position:relative;width:130px;height:130px;animation:harbourFloat 5s ease-in-out infinite;">
+            <path d="M36 8 A28 28 0 1 1 18 16" stroke="#1B7A7E" stroke-width="5" stroke-linecap="round" fill="none" opacity=".95"/>
+            <path d="M18 16 L34 32 L48 26 L62 40" stroke="#E8A04C" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <circle cx="62" cy="40" r="5" fill="#E8A04C"/>
+          </svg>
+        </div>
+        <h1 class="hero">Harbour</h1>
+        <div style="font-family:'Fraunces',serif;font-style:italic;font-size:clamp(20px,3vw,26px);opacity:.9;margin-bottom:14px;color:#0F3A3D;">From uncertainty to a clear next step.</div>
+        <p style="font-size:16px;line-height:1.65;color:rgba(20,52,47,.82);max-width:420px;margin:0 auto 36px;">From chaos to confirmed help. Tell me what's happening and I'll find the support you deserve.</p>
+        <button class="harbour-btn primary" style="max-width:280px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:10px;border-radius:999px;padding:17px 38px;" onclick="goScreen('needs')">
+          Get started
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#0B3D37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div style="display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:rgba(20,52,47,.6);margin-top:20px;">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="#0F3A3D" stroke-width="1.8"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="#0F3A3D" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Audio is not stored · Saved cases use a case number
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ NEEDS ─ -->
+    <div class="pscreen" id="scr-needs">
+      <h2 class="screen-h">What's going on?</h2>
+      <p style="font-size:16px;line-height:1.6;color:rgba(20,52,47,.82);margin-bottom:22px;">A few taps, then tell us in your own words.</p>
+
+      <div style="display:flex;align-items:center;gap:11px;background:#ffffff;border:1px solid rgba(20,52,47,.2);border-radius:14px;padding:13px 16px;font-size:14px;color:rgba(20,52,47,.92);margin-bottom:28px;" id="geo-row">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" style="flex:none;"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z" stroke="#0F3A3D" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.4" stroke="#0F3A3D" stroke-width="1.8"/></svg>
+        <span id="geo-text">Requesting location…</span>
+        <svg id="geo-spinner" viewBox="0 0 24 24" width="16" height="16" style="flex:none;display:none;animation:spin 1s linear infinite;margin-left:auto;opacity:.6;"><circle cx="12" cy="12" r="9" fill="none" stroke="#0F3A3D" stroke-width="2.5" stroke-dasharray="28 56" stroke-linecap="round"/></svg>
+        <svg id="geo-check" viewBox="0 0 24 24" width="16" height="16" fill="none" style="flex:none;display:none;margin-left:auto;"><path d="M5 12l5 5L19 7" stroke="#1B7A7E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+
+      <span class="harbour-label">What do you need most?</span>
+      <div class="chip-group" id="need-chips">
+        <button class="need-btn" data-need="food" onclick="toggleNeed(this)">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none"><path d="M5 3v8M8 3v8M6.5 11v10M16 3c-1.5 0-2.5 2-2.5 5s1 4 2.5 4 2.5-1 2.5-4-1-5-2.5-5zm0 9v9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Food
+        </button>
+        <button class="need-btn" data-need="housing" onclick="toggleNeed(this)">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none"><path d="M4 11l8-6 8 6M6 10v9h12v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Housing
+        </button>
+        <button class="need-btn" data-need="healthcare" onclick="toggleNeed(this)">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none"><path d="M12 20s-7-4.4-7-9.5A4 4 0 0 1 12 7a4 4 0 0 1 7 3.5C19 15.6 12 20 12 20z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          Healthcare
+        </button>
+        <button class="need-btn" data-need="childcare" onclick="toggleNeed(this)">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M9 14s1 1.5 3 1.5 3-1.5 3-1.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/></svg>
+          Childcare
+        </button>
+        <button class="need-btn" data-need="employment" onclick="toggleNeed(this)">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none"><rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Employment
+        </button>
+      </div>
+
+      <span class="harbour-label">How urgent is this?</span>
+      <div class="chip-group">
+        <button class="urg-btn" data-urg="today" onclick="pickUrg(this)">Today</button>
+        <button class="urg-btn" data-urg="this_week" onclick="pickUrg(this)">This week</button>
+        <button class="urg-btn" data-urg="this_month" onclick="pickUrg(this)">This month</button>
+      </div>
+
+      <button class="harbour-btn primary" id="btn-needs-cont" disabled onclick="goScreen('situation')">Continue</button>
+      <button class="harbour-btn ghost" style="margin-top:12px;" onclick="goScreen('start')">Back</button>
+    </div>
+
+    <!-- ─ SITUATION ─ -->
+    <div class="pscreen" id="scr-situation">
+      <h2 class="screen-h">Tell us your situation</h2>
+      <p style="font-size:16px;line-height:1.6;color:rgba(20,52,47,.82);margin-bottom:24px;">In your words, any language. Type or use your voice.</p>
+
+      <div class="card-white" style="margin-bottom:22px;">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:13px;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" stroke="#0F3A3D" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <span style="font-weight:700;font-size:15px;color:#0F3A3D;">Your privacy</span>
+        </div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:9px;font-size:13.5px;line-height:1.5;color:rgba(20,52,47,.92);margin-bottom:16px;">
+          <li style="display:flex;gap:9px;"><span style="opacity:.5;">•</span>We process your transcript and store a plan only when you choose to save a case.</li>
+          <li style="display:flex;gap:9px;"><span style="opacity:.5;">•</span>Harbour does not upload or store audio; your browser may use its own speech service.</li>
+          <li style="display:flex;gap:9px;"><span style="opacity:.5;">•</span>Contact details are optional and are stored only when you request follow-up.</li>
+        </ul>
+        <button onclick="toggleConsent()" style="display:flex;align-items:center;gap:11px;border:none;background:none;cursor:pointer;color:#0F3A3D;font-family:'Plus Jakarta Sans';font-weight:600;font-size:14px;padding:0;">
+          <span id="consent-box" style="flex:none;width:22px;height:22px;border-radius:6px;border:2px solid rgba(20,52,47,.35);background:transparent;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;"></span>
+          I understand and want to continue
+        </button>
+      </div>
+
+      <textarea id="transcript" class="harbour-input" rows="4" placeholder="e.g.: I lost my job, I have two kids, I need food this week. No car." style="margin-bottom:20px;background:#ffffff;" oninput="onTranscriptChange()"></textarea>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:24px;">
+        <button id="mic-btn" title="Speak" onclick="toggleMic()" style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;background:#1B7A7E;box-shadow:0 12px 28px rgba(27,122,126,.35);animation:harbourBreathe 2.6s ease-in-out infinite;">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none"><rect x="9" y="3" width="6" height="12" rx="3" fill="#fff"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <span id="mic-hint" style="font-size:13px;color:rgba(20,52,47,.7);">Or tap to speak</span>
+      </div>
+
+      <button class="harbour-btn primary" id="btn-sit-cont" disabled onclick="doIntake()">Continue</button>
+      <button class="harbour-btn ghost" style="margin-top:12px;" onclick="goScreen('needs')">Back</button>
+    </div>
+
+    <!-- ─ DID WE UNDERSTAND? ─ -->
+    <div class="pscreen" id="scr-understand">
+      <h2 class="screen-h">Did we get that right?</h2>
+
+      <div class="card-white" style="display:flex;gap:14px;margin-bottom:22px;">
+        <span style="flex:none;width:4px;border-radius:999px;background:#E8A04C;"></span>
+        <span id="conf-quote" style="font-family:'Fraunces',serif;font-style:italic;font-size:18px;line-height:1.45;color:#0F3A3D;opacity:.95;"></span>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px;">
+        <span style="font-size:14px;font-weight:600;color:rgba(20,52,47,.85);">Understanding confidence</span>
+        <span id="conf-pct" style="font-family:'Fraunces',serif;font-weight:600;font-size:18px;color:#0F3A3D;"></span>
+      </div>
+      <div class="conf-track"><div id="conf-fill" class="conf-fill" style="width:0"></div></div>
+
+      <div id="conf-tags" style="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:22px;"></div>
+      <div id="conf-action"></div>
+
+      <div style="margin-top:20px;">
+        <button id="btn-confirm" class="harbour-btn primary" onclick="goFollowups()" style="margin-bottom:12px;">Yes, that's right</button>
+        <button class="harbour-btn ghost" onclick="goScreen('situation')">Let me correct it</button>
+      </div>
+    </div>
+
+    <!-- ─ ELIGIBILITY QUESTIONS ─ -->
+    <div class="pscreen" id="scr-followups">
+      <h2 class="screen-h">A few quick questions</h2>
+      <p style="font-size:16px;line-height:1.6;color:rgba(20,52,47,.82);margin-bottom:22px;">To find exactly what you qualify for.</p>
+      <div id="followup-list"></div>
+      <div id="elig-signals"></div>
+      <button id="match-btn" class="harbour-btn primary" style="margin-top:16px;" onclick="doMatch()" disabled>See what I qualify for</button>
+      <button class="harbour-btn ghost" style="margin-top:12px;" onclick="goScreen('understand')">Back</button>
+    </div>
+
+    <!-- ─ YOUR PLAN ─ -->
+    <div class="pscreen" id="scr-results">
+      <h2 class="screen-h">Your plan</h2>
+      <div id="route-banner"></div>
+      <p style="font-size:14.5px;line-height:1.55;color:rgba(20,52,47,.82);margin-bottom:18px;">What to do, in order. Tap <b>?</b> on any card to see why you qualify.</p>
+      <div id="save-box"></div>
+      <div id="plan-list"><div class="spinner">Optimizing your matches…</div></div>
+    </div>
+
+    <!-- ─ CONFIRMATION ─ -->
+    <div class="pscreen" id="scr-confirm">
+      <div style="text-align:center;max-width:460px;">
+        <svg viewBox="0 0 80 80" fill="none" style="width:88px;height:88px;margin:0 auto 22px;display:block;animation:harbourFloat 4s ease-in-out infinite;">
+          <circle cx="40" cy="40" r="32" stroke="#1B7A7E" stroke-width="5.5" fill="none"/>
+          <path d="M28 41 L37 50 L54 31" stroke="#E8A04C" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <div style="font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:700;color:rgba(20,52,47,.7);margin-bottom:14px;">The loop closes</div>
+        <h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:clamp(28px,5vw,38px);line-height:1.1;letter-spacing:-1px;color:#0F3A3D;margin-bottom:14px;">Done. Your spot is confirmed.</h2>
+        <p style="font-size:16px;line-height:1.6;color:rgba(20,52,47,.85);margin-bottom:26px;">We've got this with you — you don't have to do it alone.</p>
+        <div id="confirm-detail" class="card-white" style="text-align:left;margin-bottom:22px;"></div>
+        <div style="display:flex;flex-wrap:wrap;gap:11px;justify-content:center;">
+          <button class="harbour-btn ghost sm" onclick="goScreen('results')">See other programs</button>
+          <button class="harbour-btn ghost sm" onclick="goScreen('start')">Back to start</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ TAB: MY PROGRESS ─ -->
+    <div id="tab-progress-content">
+      <h2 class="screen-h">My progress</h2>
+      <p style="font-size:15px;line-height:1.55;color:rgba(20,52,47,.8);margin-bottom:22px;">Track each step. Tap to advance, or remove what you don't need.</p>
+
+      <div class="card-white" style="margin-bottom:18px;">
+        <div style="font-size:13px;font-weight:600;color:rgba(20,52,47,.85);margin-bottom:12px;">Returning? Enter your case number</div>
+        <div style="display:flex;gap:10px;">
+          <input id="recover-in" type="text" class="harbour-input" placeholder="HARBOUR-XXXXXX" style="flex:1;min-width:0;padding:12px 14px;font-size:15px;background:#ffffff;">
+          <button class="harbour-btn primary sm" onclick="recoverCase()">Find</button>
+        </div>
+        <div id="recover-out" style="font-size:12px;margin-top:8px;"></div>
+      </div>
+
+      <div id="plan-section" style="display:none;">
+        <div id="track-num"></div>
+        <div id="track-list"></div>
+        <div id="track-escalate"></div>
+      </div>
+    </div>
+
+    <!-- ─ TAB: NEAR ME ─ -->
+    <div id="tab-map-content">
+      <h2 class="screen-h">Near me</h2>
+      <p style="font-size:15px;line-height:1.55;color:rgba(20,52,47,.8);margin-bottom:20px;">Your matched resources on the map.</p>
+      <div id="pmap"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:18px;font-size:13px;font-weight:600;color:rgba(20,52,47,.85);margin-top:12px;">
+        <span style="display:inline-flex;align-items:center;gap:7px;"><span style="width:13px;height:13px;border-radius:50%;background:#E8A04C;border:2px solid #fff;box-shadow:0 0 0 1.5px #E8A04C;"></span>Your location</span>
+        <span style="display:inline-flex;align-items:center;gap:7px;"><span style="width:13px;height:13px;border-radius:50%;background:#0F3A3D;border:2px solid #fff;box-shadow:0 0 0 1.5px #0F3A3D;"></span>Your matches</span>
+        <span style="display:inline-flex;align-items:center;gap:7px;"><span style="width:10px;height:10px;border-radius:50%;background:#3FA6A0;border:2px solid #fff;box-shadow:0 0 0 1.5px #3FA6A0;"></span>Other nearby</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─ BOTTOM NAV ─ -->
+  <nav id="bottomnav">
+    <button id="bnav-situation" class="active" onclick="showTab('situation')">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      My situation
+    </button>
+    <button id="bnav-progress" onclick="showTab('progress')">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M5 20V11M10 20V5M15 20v-8M20 20V8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      My progress
+    </button>
+    <button id="bnav-nearme" onclick="showTab('nearme')">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Near me
+    </button>
+  </nav>
+</div>
+
+<!-- ─ CHAT ─ -->
+<button id="chat-fab" onclick="toggleChat()" title="Harbour helper">
+  <svg viewBox="0 0 24 24" width="26" height="26" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.6-.8L3 21l1.8-5.4a8.5 8.5 0 0 1-.8-3.6A8.38 8.38 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z" stroke="#0B3D37" stroke-width="2" stroke-linejoin="round"/></svg>
+</button>
+<div id="chat-panel">
+  <div id="chat-head">
+    <span>Harbour helper</span>
+    <button onclick="toggleChat()" style="border:none;background:none;cursor:pointer;display:inline-flex;padding:4px;">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div id="chat-body"></div>
+  <div id="chat-chips"></div>
+  <div id="chat-form">
+    <input id="chat-in" type="text" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')sendChat()">
+    <button id="chat-send" onclick="sendChat()">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M5 12h13M12 5l7 7-7 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ════ ORG WORLD ════ -->
+<div id="world-org">
+  <div id="org-login" class="login-card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:26px;">
+      <svg viewBox="0 0 72 72" fill="none" width="28" height="28"><path d="M36 8 A28 28 0 1 1 18 16" stroke="#1B7A7E" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M18 16 L34 32 L48 26 L62 40" stroke="#E8A04C" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="62" cy="40" r="5" fill="#E8A04C"/></svg>
+      <span style="font-family:'Fraunces',serif;font-weight:500;font-size:21px;letter-spacing:-.5px;color:#0B3D37;">Harbour</span>
+    </div>
+    <div class="lc-label">Organization access</div>
+    <h2>Sign in</h2>
+    <p>Manage your capacity and the people Harbour connects to you.</p>
+    <label>Email</label><input id="org-email" type="email" placeholder="org@harbour.local">
+    <label>Password</label><input id="org-pwd" type="password" placeholder="••••••••">
+    <div id="org-err" style="display:none;color:#C05040;font-size:13px;font-weight:600;margin:-8px 0 12px;text-align:center;"></div>
+    <button class="lc-btn" onclick="loginOrg()">Sign in</button>
+    <div style="margin-top:18px;background:#F0F7F4;border:1px solid rgba(27,122,126,.25);border-radius:12px;padding:14px;text-align:center;">
+      <div style="font-size:13px;color:#0F3A3D;line-height:1.8;">
+        <span style="font-weight:700;">Email:</span> org@harbour.local<br>
+        <span style="font-weight:700;">Password:</span> harbour-demo
+      </div>
+      <button onclick="document.getElementById('org-email').value='org@harbour.local';document.getElementById('org-pwd').value='harbour-demo';" style="margin-top:10px;border:1px solid rgba(27,122,126,.4);background:#fff;color:#1B7A7E;cursor:pointer;font-family:'Plus Jakarta Sans';font-weight:700;font-size:12px;padding:7px 18px;border-radius:8px;">Fill in</button>
+    </div>
+  </div>
+  <div id="org-dash" style="display:none;width:100%;">
+    <div style="max-width:1020px;margin:0 auto;padding:90px 20px 60px;animation:harbourRise .45s ease forwards;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
+        <div style="width:44px;height:44px;border-radius:13px;background:#D4E9E8;border:1px solid rgba(20,52,47,.25);display:flex;align-items:center;justify-content:center;color:#0F3A3D;font-family:'Fraunces',serif;font-weight:600;font-size:21px;">O</div>
+        <div>
+          <div style="font-family:'Fraunces',serif;font-weight:600;font-size:22px;color:#0F3A3D;line-height:1.1;">Organization</div>
+          <div style="font-size:13px;font-weight:600;color:rgba(20,52,47,.72);">Organization panel · today</div>
+        </div>
+        <button onclick="logoutOrg()" style="margin-left:auto;border:1.5px solid rgba(20,52,47,.4);background:#ffffff;color:#0F3A3D;cursor:pointer;font-family:'Plus Jakarta Sans';font-weight:700;font-size:13px;padding:10px 17px;border-radius:11px;display:inline-flex;align-items:center;gap:8px;">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="#0F3A3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Sign out
+        </button>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-card">
+          <h3>Register your capacity</h3>
+          <p>Keep your real availability live — people connect to open slots, not stale data.</p>
+
+          <span class="harbour-sublabel">Program name <span style="color:#D9735A;">*</span></span>
+          <input id="organization-name" class="harbour-input" placeholder="e.g. Hope Food Pantry Downtown" style="margin-bottom:16px;">
+
+          <span class="harbour-sublabel">Service type <span style="color:#D9735A;">*</span></span>
+          <div class="chip-group" id="organization-service-chips" style="margin-bottom:16px;">
+            <button class="need-btn sel" data-s="food" onclick="pickOrganizationService(this)">Food</button>
+            <button class="need-btn" data-s="housing" onclick="pickOrganizationService(this)">Housing</button>
+            <button class="need-btn" data-s="healthcare" onclick="pickOrganizationService(this)">Healthcare</button>
+            <button class="need-btn" data-s="childcare" onclick="pickOrganizationService(this)">Childcare</button>
+            <button class="need-btn" data-s="employment" onclick="pickOrganizationService(this)">Employment</button>
+          </div>
+
+          <span class="harbour-sublabel">Address <span style="color:#D9735A;">*</span></span>
+          <input id="organization-address" class="harbour-input" placeholder="e.g. 123 Main Street" style="margin-bottom:16px;">
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div>
+              <span class="harbour-sublabel">Phone</span>
+              <input id="organization-phone" type="tel" class="harbour-input" placeholder="+52 81 1234 5678">
+            </div>
+            <div>
+              <span class="harbour-sublabel">Service area</span>
+              <select id="organization-zone" class="harbour-input" style="cursor:pointer;">
+                <option value="3">Central district</option>
+                <option value="2">West district</option>
+                <option value="0">Southwest district</option>
+                <option value="1">Southeast district</option>
+                <option value="4">Northwest district</option>
+                <option value="5">Northeast district</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div>
+              <span class="harbour-sublabel">Contact email</span>
+              <input id="organization-email" type="email" class="harbour-input" placeholder="contact@org.mx">
+            </div>
+            <div>
+              <span class="harbour-sublabel">Website</span>
+              <input id="organization-url" type="url" class="harbour-input" placeholder="https://yourorganization.org">
+            </div>
+          </div>
+
+          <span class="harbour-sublabel">Hours <span style="color:#D9735A;">*</span></span>
+          <input id="organization-hours" class="harbour-input" placeholder="e.g. Mon–Fri 9 am–5 pm" style="margin-bottom:16px;">
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div>
+              <span class="harbour-sublabel">Open slots now <span style="color:#D9735A;">*</span></span>
+              <input id="organization-cap" type="number" value="20" min="0" class="harbour-input">
+            </div>
+            <div>
+              <span class="harbour-sublabel">Max monthly income ($)</span>
+              <input id="organization-income" type="number" value="0" min="0" class="harbour-input" placeholder="0 = no limit">
+            </div>
+          </div>
+
+          <span class="harbour-sublabel">Min household size</span>
+          <select id="organization-household" class="harbour-input" style="cursor:pointer;margin-bottom:22px;">
+            <option value="0">No minimum</option>
+            <option value="2">2+ people</option>
+            <option value="3">3+ people</option>
+            <option value="4">4+ people</option>
+          </select>
+
+          <button class="harbour-btn primary" onclick="organizationRegister()">Save — activate in matching</button>
+          <div id="organization-reg-out" style="margin-top:12px;"></div>
+        </div>
+        <div class="dash-card">
+          <h3>Predicted demand next week</h3>
+          <p>Pre-position capacity before the crisis. We forecast resources and geography — never individuals.</p>
+          <div id="organization-map"></div>
+          <div style="display:flex;flex-wrap:wrap;gap:16px;font-size:12.5px;font-weight:600;color:rgba(20,52,47,.85);margin-bottom:20px;">
+            <span style="display:inline-flex;align-items:center;gap:7px;"><span style="width:9px;height:9px;border-radius:50%;background:#D9735A;"></span>High scarcity</span>
+            <span style="display:inline-flex;align-items:center;gap:7px;"><span style="width:9px;height:9px;border-radius:50%;background:#E8A04C;"></span>Tight</span>
+            <span style="display:inline-flex;align-items:center;gap:7px;"><span style="width:9px;height:9px;border-radius:50%;background:#1B7A7E;"></span>OK</span>
+          </div>
+          <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:rgba(20,52,47,.45);margin-bottom:10px;">Where to pre-position next week</div>
+          <div id="forecast-shortfalls"><div class="spinner">Loading…</div></div>
+        </div>
+        <div class="dash-card">
+          <h3>Results — did help arrive?</h3>
+          <p>Loop closure: help is only counted when the person confirms it arrived.</p>
+          <div id="organization-kpis"><div class="spinner">Loading…</div></div>
+        </div>
+        <div class="dash-card">
+          <h3>Fair assignment engine (MILP batch)</h3>
+          <p>Same people, same scarce slots, run two ways. Each square is a person; faded = unserved.</p>
+          <div id="milp-sim"><div class="spinner">Running the solver…</div></div>
+          <button class="harbour-btn ghost sm" style="margin-top:12px;" onclick="runMilp()">Re-run batch</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ CASEWORKER WORLD ════ -->
+<div id="world-cw">
+  <div id="cw-login" class="login-card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:26px;">
+      <svg viewBox="0 0 72 72" fill="none" width="28" height="28"><path d="M36 8 A28 28 0 1 1 18 16" stroke="#1B7A7E" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M18 16 L34 32 L48 26 L62 40" stroke="#E8A04C" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="62" cy="40" r="5" fill="#E8A04C"/></svg>
+      <span style="font-family:'Fraunces',serif;font-weight:500;font-size:21px;letter-spacing:-.5px;color:#0B3D37;">Harbour</span>
+    </div>
+    <div class="lc-label">Caseworker access</div>
+    <h2>Sign in</h2>
+    <p>Review the cases that need your human support.</p>
+    <label>Email</label><input id="cw-email" type="email" placeholder="caseworker@harbour.local">
+    <label>Password</label><input id="cw-pwd" type="password" placeholder="••••••••">
+    <div id="cw-err" style="display:none;color:#C05040;font-size:13px;font-weight:600;margin:-8px 0 12px;text-align:center;"></div>
+    <button class="lc-btn" onclick="loginCw()">Sign in</button>
+    <div style="margin-top:18px;background:#F0F7F4;border:1px solid rgba(27,122,126,.25);border-radius:12px;padding:14px;text-align:center;">
+      <div style="font-size:13px;color:#0F3A3D;line-height:1.8;">
+        <span style="font-weight:700;">Email:</span> caseworker@harbour.local<br>
+        <span style="font-weight:700;">Password:</span> harbour-demo
+      </div>
+      <button onclick="document.getElementById('cw-email').value='caseworker@harbour.local';document.getElementById('cw-pwd').value='harbour-demo';" style="margin-top:10px;border:1px solid rgba(27,122,126,.4);background:#fff;color:#1B7A7E;cursor:pointer;font-family:'Plus Jakarta Sans';font-weight:700;font-size:12px;padding:7px 18px;border-radius:8px;">Fill in</button>
+    </div>
+  </div>
+  <div id="cw-dash" style="display:none;width:100%;">
+    <div style="max-width:1000px;margin:0 auto;padding:90px 20px 60px;animation:harbourRise .45s ease forwards;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
+        <div style="width:44px;height:44px;border-radius:50%;background:#D4E9E8;border:1px solid rgba(20,52,47,.25);display:flex;align-items:center;justify-content:center;color:#0F3A3D;font-family:'Fraunces',serif;font-weight:600;font-size:19px;">M</div>
+        <div>
+          <div style="font-family:'Fraunces',serif;font-weight:600;font-size:22px;color:#0F3A3D;line-height:1.1;">Social Worker</div>
+          <div style="font-size:13px;font-weight:600;color:rgba(20,52,47,.72);">Escalation panel · today</div>
+        </div>
+        <button onclick="logoutCw()" style="margin-left:auto;border:1.5px solid rgba(20,52,47,.4);background:#ffffff;color:#0F3A3D;cursor:pointer;font-family:'Plus Jakarta Sans';font-weight:700;font-size:13px;padding:10px 17px;border-radius:11px;display:inline-flex;align-items:center;gap:8px;">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="#0F3A3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Sign out
+        </button>
+      </div>
+      <div id="cw-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:28px;"></div>
+      <div class="dash-card" style="margin-bottom:18px;">
+        <h3>Escalation queue — triaged by need, not first-come-first-served</h3>
+        <p style="margin-bottom:20px;">Caseworker time is scarce. Harbour orders cases by vulnerability so the highest-need person is seen first.</p>
+        <div id="cw-queue"><div class="spinner">Loading queue…</div></div>
+      </div>
+      <div class="dash-card">
+        <h3>Resolved cases</h3>
+        <p>Closed loops, with the partner organization each case was sent to.</p>
+        <div id="cw-resolved"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- resolve modal -->
+<div id="resolveModal" style="display:none;position:fixed;inset:0;background:rgba(15,58,61,.45);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:#FBFAF7;border-radius:20px;padding:26px;max-width:360px;width:90%;box-shadow:0 24px 60px rgba(8,42,38,.22);">
+    <div style="font-family:'Fraunces',serif;font-weight:600;font-size:20px;color:#0F3A3D;margin-bottom:6px;">Where did you refer this person?</div>
+    <div style="font-size:13.5px;color:rgba(20,52,47,.7);margin-bottom:16px;">Pick the partner organization (or direct assistance).</div>
+    <select id="resolveOrganization" class="harbour-input" style="margin-bottom:14px;background:#ffffff;">
+      <option>Direct assistance</option>
+      <option>Northside Food Bank</option>
+      <option>Eastside Community Fridge</option>
+      <option>City Rent Relief Program</option>
+      <option>Community Health Clinic</option>
+      <option>Job Placement Center</option>
+    </select>
+    <button class="harbour-btn primary" style="margin-bottom:10px;" onclick="confirmResolve()">Confirm referral</button>
+    <button class="harbour-btn ghost" onclick="closeResolve()">Cancel</button>
+  </div>
+</div>
+
+<script>
+const API = location.origin;
+const PHASES = ['Seen','Requested','Applied','Received'];
+const S = {
+  needs:[], urgency:null, agreed:false, intake:null, coords:null,
+  plan:[], tracking:null, email:'', organizationConsent:false,
+  local_ids:null, bootstrapReady:false,
+  answers:{}, refined:{}, organizationService:'food',
+  personTab:'situation', screen:'start',
+  chatReady:false,
+};
+let pmap=null, omap=null, recording=false, recog=null;
+
+function saveLocal(){try{localStorage.setItem('harbour_v1',JSON.stringify({plan:S.plan,tracking:S.tracking,coords:S.coords}));}catch(e){}}
+function loadLocal(){try{const d=JSON.parse(localStorage.getItem('harbour_v1')||'{}');if(d.plan){S.plan=d.plan;S.tracking=d.tracking;if(d.coords&&_inUSABbox(d.coords[0],d.coords[1]))S.coords=d.coords;}}catch(e){}}
+async function post(p,b){const r=await fetch(API+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});return r.json();}
+async function get(p){const r=await fetch(API+p);return r.json();}
+
+function setWorld(w){
+  ['person','org','cw'].forEach(x=>{
+    document.getElementById('world-'+x).classList.toggle('active',x===w);
+    document.getElementById('btn-'+x).classList.toggle('active',x===w);
+  });
+  const pb=document.getElementById('world-person');
+  if(w==='person')pb.classList.add('person-active');else pb.classList.remove('person-active');
+  document.getElementById('bottomnav').style.display=w==='person'?'flex':'none';
+  document.getElementById('chat-fab').style.display=w==='person'?'flex':'none';
+  if(w==='org')loadOrg();
+  if(w==='cw')loadCw();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function goScreen(id){
+  S.screen=id;
+  document.querySelectorAll('.pscreen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-progress-content').classList.remove('active');
+  document.getElementById('tab-map-content').classList.remove('active');
+  showTab('situation',true);
+  const el=document.getElementById('scr-'+id);
+  if(el)el.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function showTab(t,skipScroll){
+  S.personTab=t;
+  ['situation','progress','nearme'].forEach(x=>document.getElementById('bnav-'+x).classList.toggle('active',x===t));
+  document.querySelectorAll('.pscreen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-progress-content').classList.remove('active');
+  document.getElementById('tab-map-content').classList.remove('active');
+  if(t==='situation'){const el=document.getElementById('scr-'+S.screen);if(el)el.classList.add('active');}
+  else if(t==='progress'){document.getElementById('tab-progress-content').classList.add('active');}
+  else if(t==='nearme'){document.getElementById('tab-map-content').classList.add('active');setTimeout(renderMap,150);}
+  if(!skipScroll)window.scrollTo({top:0,behavior:'smooth'});
+}
+
+const _DEMO_CENTER=[29.7604,-95.3698];
+function _inUSABbox(lat,lon){
+  return lat>=25.84&&lat<=49.5&&lon>=-125.0&&lon<=-66.9;
+}
+function _geoSpinner(on){
+  const sp=document.getElementById('geo-spinner'),ck=document.getElementById('geo-check');
+  if(sp)sp.style.display=on?'block':'none';
+  if(ck)ck.style.display='none';
+}
+function _geoDone(text){
+  const sp=document.getElementById('geo-spinner'),ck=document.getElementById('geo-check');
+  if(sp)sp.style.display='none';
+  if(ck)ck.style.display='block';
+  setGeoText(text);
+  S.bootstrapReady=true;
+}
+async function _bootstrapArea(lat,lon){
+  const key=`harbour_area_${lat.toFixed(2)}_${lon.toFixed(2)}`;
+  const raw=sessionStorage.getItem(key);
+  if(raw){
+    try{
+      const cached=JSON.parse(raw);
+      if(cached&&cached.area_ids&&cached.area_ids.length){
+        S.local_ids=cached.area_ids;
+        if(cached.national){
+          _geoDone('No local organizations found — showing federal programs available in your state.');
+        } else {
+          _geoDone(`${cached.area_ids.length} local resources loaded.`);
+        }
+        return;
+      }
+    }catch(e){}
+    sessionStorage.removeItem(key);
+  }
+  _geoSpinner(true);
+  setGeoText('Scanning your area for local resources…');
+  try{
+    const r=await post('/api/bootstrap_area',{lat,lon,radius_km:10});
+    if(r.area_ids&&r.area_ids.length){
+      S.local_ids=r.area_ids;
+      const national=r.status==='national_fallback';
+      sessionStorage.setItem(key,JSON.stringify({area_ids:r.area_ids,national}));
+      if(national){
+        _geoDone('No local organizations found — showing federal programs available in your state.');
+      } else {
+        _geoDone(`${r.found} local resources found${r.new?' ('+r.new+' new)':''}.`);
+      }
+    } else {
+      S.local_ids=['NAT001','NAT002','NAT003','NAT004','NAT005','NAT006','NAT007'];
+      _geoDone('No local organizations found — showing federal programs available in your state.');
+    }
+  }catch(e){
+    S.local_ids=['NAT001','NAT002','NAT003','NAT004','NAT005','NAT006','NAT007'];
+    _geoDone('No local data available — showing federal programs available in your state.');
+  }
+}
+function askGeo(){
+  if(!navigator.geolocation){
+    S.coords=_DEMO_CENTER;
+    setGeoText('Demonstration service area');
+    S.bootstrapReady=true;
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    async p=>{
+      const lat=p.coords.latitude,lon=p.coords.longitude;
+      if(!_inUSABbox(lat,lon)){
+        S.coords=_DEMO_CENTER;
+        setGeoText('Demonstration service area');
+        S.bootstrapReady=true;
+        return;
+      }
+      S.coords=[lat,lon];saveLocal();
+      await _bootstrapArea(lat,lon);
+    },
+    ()=>{S.coords=_DEMO_CENTER;setGeoText('Demonstration service area');S.bootstrapReady=true;}
+  );
+}
+function setGeoText(t){const el=document.getElementById('geo-text');if(el)el.textContent=t;}
+
+function toggleNeed(btn){
+  btn.classList.toggle('sel');
+  S.needs=[...document.querySelectorAll('#need-chips .need-btn.sel')].map(x=>x.dataset.need);
+  updateNeedsCont();
+}
+function pickUrg(btn){
+  document.querySelectorAll('.urg-btn').forEach(x=>x.classList.remove('sel'));
+  btn.classList.add('sel');S.urgency=btn.dataset.urg;updateNeedsCont();
+}
+function updateNeedsCont(){
+  const btn=document.getElementById('btn-needs-cont');if(!btn)return;
+  btn.disabled=!(S.needs.length>0&&!!S.urgency);
+}
+
+function toggleConsent(){
+  S.agreed=!S.agreed;
+  const box=document.getElementById('consent-box');
+  if(S.agreed){box.style.background='#E8A04C';box.style.borderColor='#E8A04C';box.innerHTML='<svg viewBox="0 0 24 24" width="13" height="13" fill="none"><path d="M5 12l4 4 10-10" stroke="#0B3D37" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>';}
+  else{box.style.background='transparent';box.style.borderColor='rgba(20,52,47,.35)';box.innerHTML='';}
+  updateSitCont();
+}
+function onTranscriptChange(){updateSitCont();}
+function updateSitCont(){
+  const btn=document.getElementById('btn-sit-cont');if(!btn)return;
+  btn.disabled=!(S.agreed&&document.getElementById('transcript').value.trim().length>0);
+}
+
+function toggleMic(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const hint=document.getElementById('mic-hint');
+  if(!SR){if(hint)hint.textContent='Voice not available — please type your situation';return;}
+  if(!recog){
+    recog=new SR();recog.continuous=true;recog.interimResults=true;recog.lang='en-US';
+    recog.onresult=e=>{let t='';for(const r of e.results)t+=r[0].transcript;document.getElementById('transcript').value=t;onTranscriptChange();};
+    recog.onend=()=>{recording=false;const mb=document.getElementById('mic-btn');if(mb)mb.style.background='#1B7A7E';if(hint)hint.textContent='Tap to speak again';};
+  }
+  if(!recording){recog.start();recording=true;const mb=document.getElementById('mic-btn');if(mb)mb.style.background='#D9735A';if(hint)hint.textContent='Listening… tap to stop';}
+  else recog.stop();
+}
+
+async function doIntake(){
+  if(!S.bootstrapReady){
+    const btn=document.getElementById('btn-sit-cont');
+    if(btn){btn.disabled=true;btn.textContent='Loading resources…';}
+    await new Promise(res=>{const iv=setInterval(()=>{if(S.bootstrapReady){clearInterval(iv);res();}},200);});
+    if(btn){btn.disabled=false;btn.textContent='Continue';}
+  }
+  let t=document.getElementById('transcript').value.trim();
+  if(!t&&S.needs.length)t='I need '+S.needs.join(' and ')+', '+S.urgency.replace('_',' ');
+  if(!t)t='I need help';
+  goScreen('understand');
+  document.getElementById('conf-quote').textContent='"'+t+'"';
+  document.getElementById('conf-fill').style.width='0';
+  document.getElementById('conf-pct').textContent='…';
+  document.getElementById('conf-tags').innerHTML='';
+  document.getElementById('conf-action').innerHTML='';
+  document.getElementById('btn-confirm').style.display='block';
+  const r=await post('/api/intake',{transcript:t,lat:S.coords?S.coords[0]:null,lon:S.coords?S.coords[1]:null});
+  S.intake=r;S.intake.transcript=t;
+  const pct=Math.round(r.confidence*100);
+  document.getElementById('conf-pct').textContent=pct+'%';
+  document.getElementById('conf-fill').style.width=pct+'%';
+  document.getElementById('conf-fill').style.background=pct>=80?'#1B7A7E':pct>=50?'#E8A04C':'#D9735A';
+  const needs=r.needs.length?r.needs:S.needs;
+  document.getElementById('conf-tags').innerHTML=needs.map(n=>`<span style="background:#D4E9E8;border:1px solid rgba(20,52,47,.22);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;color:#0F3A3D;">${n}</span>`).join('')+`<span style="background:#D4E9E8;border:1px solid rgba(20,52,47,.22);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;color:#0F3A3D;">urgency: ${r.urgency}</span><span style="background:#D4E9E8;border:1px solid rgba(20,52,47,.22);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;color:#0F3A3D;">${r.language}</span>`;
+  let msg='';
+  if(r.action==='ESCALATE_SAFETY'){
+    msg=`<div style="background:#FFF7F0;border:1.5px solid rgba(232,160,76,.5);border-radius:16px;padding:18px;font-size:14px;line-height:1.7;">
+      <div style="font-size:17px;font-weight:700;color:#0F3A3D;margin-bottom:8px;">You are not alone.</div>
+      <div style="color:rgba(20,52,47,.85);margin-bottom:14px;">Whatever you are going through right now, there are people who care and want to help. You deserve support — and it is okay to ask for it.</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+        <div style="background:#fff;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;"><span style="flex:none;width:36px;height:36px;background:#D4E9E8;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#0F3A3D;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M6.6 10.8a15.6 15.6 0 006.6 6.6l2.2-2.2a1 1 0 011.1-.2c1.2.4 2.5.6 3.8.6a1 1 0 011 1V20a1 1 0 01-1 1C10.6 21 3 13.4 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.3.2 2.6.6 3.8a1 1 0 01-.2 1.1L6.6 10.8z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>988</b> — Suicide &amp; Crisis Lifeline<br><span style="font-size:12px;color:rgba(20,52,47,.6);">Call or text, free, 24/7</span></span></div>
+        <div style="background:#fff;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;"><span style="flex:none;width:36px;height:36px;background:#D4E9E8;border-radius:10px;display:flex;align-items:center;justify-content:color:#0F3A3D;justify-content:center;color:#0F3A3D;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Text <b>HOME</b> to <b>741741</b> — Crisis Text Line<br><span style="font-size:12px;color:rgba(20,52,47,.6);">Free text support, 24/7</span></span></div>
+        <div style="background:#fff;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;"><span style="flex:none;width:36px;height:36px;background:#D4E9E8;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#0F3A3D;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>1-800-662-4357</b> — SAMHSA Mental Health<br><span style="font-size:12px;color:rgba(20,52,47,.6);">Free, confidential, 24/7</span></span></div>
+      </div>
+      <div style="font-size:13px;color:rgba(20,52,47,.65);margin-bottom:14px;">We are also finding nearby support resources for you.</div>
+      <button class="harbour-btn primary" style="width:100%;" onclick="doMatch()">See nearby resources →</button>
+    </div>`;
+    document.getElementById('btn-confirm').style.display='none';
+    if(!r.needs.includes('healthcare')) r.needs.push('healthcare');
+    S.intake=r;
+  }
+  else if(r.action==='ASK_REPEAT')msg='<div class="harbour-warn">We couldn\'t understand well. Tap "Let me correct it" — after two tries we connect you with a person.</div>';
+  else if(r.action==='CONFIRM_TRANSCRIPT')msg='<div class="harbour-warn">Please confirm we understood you before continuing.</div>';
+  document.getElementById('conf-action').innerHTML=msg;
+}
+
+function goFollowups(){
+  const fu=(S.intake&&S.intake.followups)||[];
+  if(!fu.length){doMatch();return;}
+  S.answers={};S._totalQ=fu.length;
+  document.getElementById('followup-list').innerHTML=fu.map(q=>`
+    <div style="margin-bottom:16px;">
+      <span class="harbour-label">${q.q}</span>
+      <div class="chip-group" data-qid="${q.id}" style="margin-bottom:4px;">${q.options.map(o=>`<button class="need-btn" onclick="pickFollowup(this,'${q.id}','${o.replace(/'/g,"\\'")}')">${o}</button>`).join('')}</div>
+      <div style="font-size:11px;color:rgba(20,52,47,.55);">${q.why}</div>
+    </div>`).join('');
+  document.getElementById('elig-signals').innerHTML='';
+  document.getElementById('match-btn').disabled=true;
+  goScreen('followups');
+}
+function pickFollowup(el,qid,val){
+  el.parentElement.querySelectorAll('.need-btn').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');S.answers[qid]=val;
+  const answered=Object.keys(S.answers).length;
+  document.getElementById('match-btn').disabled=answered<(S._totalQ||1);
+  post('/api/followups/interpret',{answers:S.answers}).then(r=>{S.refined=r.fields||{};document.getElementById('elig-signals').innerHTML=r.signals.map(s=>`<div class="harbour-ok">${s}</div>`).join('');});
+}
+
+async function doMatch(){
+  goScreen('results');
+  const needs=(S.intake.needs&&S.intake.needs.length)?S.intake.needs:S.needs;
+  const rf=S.refined||{};
+  const r=await post('/api/match',{needs:needs.length?needs:['food'],urgency:S.intake.urgency,zip_zone:1,lat:S.coords?S.coords[0]:null,lon:S.coords?S.coords[1]:null,local_resource_ids:S.local_ids||null,has_transport:false,language:S.intake.language,household_size:rf.household_size||3,monthly_income:rf.monthly_income||900,has_children:!!rf.has_children,priority_housing:!!rf.priority_housing});
+  if(!r.plan||!r.plan.length){document.getElementById('plan-list').innerHTML='<div class="spinner">No matches in current capacity — escalating to a caseworker.</div>';return;}
+  S.tracking=r.tracking_number;S.plan=r.plan.map(p=>({...p,phase:0}));
+  const emer=r.tier==='emergency';
+  document.getElementById('route-banner').innerHTML=emer?`<div class="route-banner emergency"><div class="rt"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Immediate response</div>${r.routing_reason}</div>`:'';
+  saveLocal();renderPlan();renderSaveBox();
+}
+function renderPlan(){
+  const crisisCard=(S.intake&&S.intake.safety_flag)?`<div style="background:#FFF7F0;border:1.5px solid rgba(232,160,76,.45);border-radius:16px;padding:16px;margin-bottom:16px;">
+    <div style="font-size:13px;font-weight:700;color:#0F3A3D;margin-bottom:10px;">Crisis support — available right now</div>
+    <div style="display:flex;flex-direction:column;gap:7px;font-size:13px;color:#0F3A3D;">
+      <div style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M6.6 10.8a15.6 15.6 0 006.6 6.6l2.2-2.2a1 1 0 011.1-.2c1.2.4 2.5.6 3.8.6a1 1 0 011 1V20a1 1 0 01-1 1C10.6 21 3 13.4 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.3.2 2.6.6 3.8a1 1 0 01-.2 1.1L6.6 10.8z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>988</b> — Suicide &amp; Crisis Lifeline (call or text, 24/7, free)</span></div>
+      <div style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Text <b>HOME</b> to <b>741741</b> — Crisis Text Line (24/7, free)</span></div>
+      <div style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>1-800-662-4357</b> — SAMHSA Mental Health Helpline</span></div>
+      <div style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M10.3 3.2L1.6 18a2 2 0 001.7 3h17.4a2 2 0 001.7-3L13.7 3.2a2 2 0 00-3.4 0z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="currentColor"/></svg><span><b>911</b> — If you or someone is in immediate danger</span></div>
+    </div>
+  </div>`:'';
+  document.getElementById('plan-list').innerHTML=crisisCard+S.plan.map((p,idx)=>`
+    <div class="res-card">
+      <div style="display:flex;align-items:flex-start;gap:13px;margin-bottom:12px;">
+        <span class="res-rank">${p.rank}</span>
+        <div style="flex:1;">
+          ${p.start_here?'<span style="display:inline-block;background:#E8A04C;color:#0B3D37;font-size:11px;font-weight:800;letter-spacing:.5px;padding:4px 10px;border-radius:999px;margin-bottom:8px;">START HERE TODAY</span><br>':''}
+          <div style="font-family:\'Fraunces\',serif;font-weight:600;font-size:19px;line-height:1.2;color:#0F3A3D;margin-bottom:7px;">${p.name}<button onclick="toggleWhy(${idx})" style="margin-left:8px;width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(20,52,47,.3);background:none;color:#0F3A3D;cursor:pointer;font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;">?</button></div>
+          <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:rgba(20,52,47,.7);">
+            <span>${p.address||p.distance_mi+' mi'}</span>
+            <span>${p.hours}</span>
+            <span style="font-weight:700;color:#A4661F;">${Math.round(p.confidence*100)}% match</span>
+          </div>
+        </div>
+      </div>
+      <div class="res-why" id="why${idx}">
+        ${p.why_plain}
+        <div class="readability-badge">✓ Written at <b>${p.readability.plain_level}</b> reading level — official rules are typically ${p.readability.legal_level}.</div>
+        <details style="margin-top:8px;"><summary style="font-size:11px;color:rgba(20,52,47,.5);cursor:pointer;">View official rule</summary><div style="font-size:11px;color:rgba(20,52,47,.5);margin-top:5px;">§ ${p.citation}</div></details>
+      </div>
+      ${p.stale?'<div class="stale-warn">⚠ Not verified in 45+ days — call ahead before going</div>':''}
+      <div style="background:#F4F1EA;border-radius:13px;padding:14px;margin-top:12px;">
+        <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:rgba(20,52,47,.7);margin-bottom:10px;">Your next steps</div>
+        <ol style="list-style:none;counter-reset:step;display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.5;margin-bottom:12px;">${p.steps.map((s,i)=>`<li style="display:flex;gap:10px;"><span style="flex:none;font-weight:800;color:#E8A04C;">${i+1}.</span><span style="color:rgba(20,52,47,.92);">${s}</span></li>`).join('')}</ol>
+        <div style="font-size:13.5px;color:rgba(20,52,47,.88);margin-bottom:10px;"><b>Bring:</b> ${p.bring}</div>
+        ${p.url?`<a href="${p.url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;color:#14342F;font-weight:700;font-size:14px;text-decoration:underline;text-underline-offset:3px;">Open official page →</a>`:''}
+      </div>
+      <button onclick="advancePlan('${p.resource_id}')" style="width:100%;margin-top:14px;border:1.5px solid rgba(20,52,47,.3);background:#ffffff;color:#0F3A3D;cursor:pointer;font-family:'Plus Jakarta Sans';font-weight:700;font-size:15px;padding:13px;border-radius:12px;">✓ Mark as Requested</button>
+    </div>`).join('');
+}
+function toggleWhy(i){document.getElementById('why'+i).classList.toggle('open');}
+
+function renderSaveBox(){
+  document.getElementById('save-box').innerHTML=`
+    <div class="card-white" style="margin-bottom:18px;">
+      <button class="harbour-btn primary" onclick="saveCase()">Save my case</button>
+      <p style="font-size:12.5px;color:rgba(20,52,47,.6);line-height:1.5;margin-top:10px;text-align:center;">All cases are saved privately and linked to a unique case number.</p>
+      <div id="save-out"></div>
+    </div>`;
+}
+async function saveCase(){
+  S.email=(document.getElementById('notify-email')||{}).value||'';
+  const btn=document.querySelector('[onclick="saveCase()"]');
+  if(btn){btn.disabled=true;btn.textContent='Saving…';}
+  await post('/api/case/save',{tracking:S.tracking,plan:S.plan,email:S.email,organization_consent:false});
+  if(btn){btn.style.display='none';}
+  document.getElementById('save-out').innerHTML=`
+    <div style="background:#F4F1EA;border:1.5px solid rgba(20,52,47,.18);border-radius:16px;padding:20px;text-align:center;margin-top:12px;">
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:rgba(20,52,47,.55);margin-bottom:8px;">Case saved</div>
+      <div style="font-family:'Fraunces',serif;font-weight:600;font-size:28px;letter-spacing:1px;color:#E8A04C;margin-bottom:10px;">${S.tracking}</div>
+      <div style="font-size:13px;color:rgba(20,52,47,.7);">Write this down — use it in "My progress" to check your plan anytime.</div>
+    </div>`;
+}
+function advancePlan(rid){const p=S.plan.find(x=>x.resource_id===rid);if(!p)return;p.phase=Math.min(p.phase+1,3);saveLocal();showTab('progress');renderTracker();}
+
+async function saveNotifyEmail(){
+  const email=(document.getElementById('notify-email')||{}).value||'';
+  if(!email){document.getElementById('notify-out').innerHTML='<span style="color:#D9735A;">Enter a valid email first.</span>';return;}
+  S.email=email;
+  if(S.tracking){
+    await post('/api/case/save',{tracking:S.tracking,plan:S.plan,email:S.email,organization_consent:S.organizationConsent||false});
+    document.getElementById('notify-out').innerHTML='<span style="color:#1B7A7E;">✓ Email saved with this case. Automated email is not enabled in the demo.</span>';
+  } else {
+    document.getElementById('notify-out').innerHTML='<span style="color:#D9735A;">Save your case first from "My situation".</span>';
+  }
+}
+async function recoverCase(){
+  const num=(document.getElementById('recover-in').value||'').trim().toUpperCase();if(!num)return;
+  const r=await get('/api/case/'+encodeURIComponent(num));
+  if(r.found){S.plan=(r.plan||[]).map(p=>({...p,phase:p.phase||0}));S.tracking=num;saveLocal();document.getElementById('recover-out').innerHTML='<span style="color:#1B7A7E;">✓ Case found.</span>';renderTracker();}
+  else document.getElementById('recover-out').innerHTML='<span style="color:#D9735A;">No case found with that number.</span>';
+}
+function renderTracker(){
+  document.getElementById('plan-section').style.display='block';
+  if(!S.plan.length){document.getElementById('track-num').innerHTML='';document.getElementById('track-list').innerHTML='<div class="spinner">No plan yet — start in "My situation".</div>';return;}
+  document.getElementById('track-num').innerHTML=`<div class="card-white" style="margin-bottom:18px;"><div style="font-size:13px;font-weight:600;color:#0F3A3D;margin-bottom:10px;">Add an optional contact email</div><div style="font-size:13px;color:rgba(20,52,47,.7);margin-bottom:12px;">The demo saves this with your case for follow-up. Automated email notifications require a provider and are not enabled yet.</div><input id="notify-email" type="email" class="harbour-input" placeholder="your@email.com (optional)" style="margin-bottom:10px;background:#fff;"><button class="harbour-btn primary sm" onclick="saveNotifyEmail()">Save email</button><div id="notify-out" style="font-size:12px;margin-top:8px;"></div></div>`;
+  document.getElementById('track-list').innerHTML=S.plan.map(p=>{
+    const allDone=p.phase>=PHASES.length-1;
+    const stepper=PHASES.map((ph,i)=>{const done=allDone||i<p.phase;const cur=!done&&i===p.phase;return`<div class="ph ${done?'done':cur?'cur':''}">${i>0?'<div class="line"></div>':''}<div class="dot">${done?'✓':i+1}</div><span class="lbl">${ph}</span></div>`;}).join('');
+    const na='<span style="color:rgba(20,52,47,.35);font-style:italic;">Not available</span>';
+    const addr=p.address||na;
+    const hours=p.hours&&p.hours!=='Call for hours'?p.hours:na;
+    const phone=p.phone?`<a href="tel:${p.phone}" style="color:#1B7A7E;font-weight:600;">${p.phone}</a>`:na;
+    const web=p.url?`<a href="${p.url}" target="_blank" rel="noopener" style="color:#1B7A7E;font-weight:600;">Open website →</a>`:na;
+    const matchPct=p.confidence?Math.round(p.confidence*100)+'% match':'';
+    return `<div class="card-white" style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div style="font-family:'Fraunces',serif;font-weight:600;font-size:18px;color:#0F3A3D;flex:1;">${p.name}</div>
+        <button title="Remove" onclick="dismissPlan('${p.resource_id}')" style="border:none;background:#F4F1EA;color:rgba(20,52,47,.6);cursor:pointer;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:16px;flex:none;margin-left:8px;">×</button>
+      </div>
+      ${matchPct?`<div style="font-size:12px;color:rgba(20,52,47,.5);margin-bottom:14px;">${p.service} · ${matchPct}</div>`:''}
+      <div class="stepper">${stepper}</div>
+      <div style="background:rgba(232,160,76,.14);border:1px solid rgba(232,160,76,.32);border-radius:12px;padding:12px 15px;font-size:13.5px;line-height:1.6;color:#8A5A1F;margin-bottom:14px;">${followMsg(p)}</div>
+      <div style="background:#F4F1EA;border-radius:12px;padding:14px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:rgba(20,52,47,.45);margin-bottom:3px;">Address</div><div style="font-size:13px;color:#0F3A3D;">${addr}</div></div>
+        <div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:rgba(20,52,47,.45);margin-bottom:3px;">Hours</div><div style="font-size:13px;color:#0F3A3D;">${hours}</div></div>
+        <div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:rgba(20,52,47,.45);margin-bottom:3px;">Phone</div><div style="font-size:13px;">${phone}</div></div>
+        <div><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:rgba(20,52,47,.45);margin-bottom:3px;">Website</div><div style="font-size:13px;">${web}</div></div>
+      </div>
+      ${p.bring?`<div style="font-size:13px;color:rgba(20,52,47,.8);margin-bottom:14px;"><b>What to bring:</b> ${p.bring}</div>`:''}
+      ${p.phase<3?`
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+          <button class="harbour-btn ghost sm" onclick="advanceTrack('${p.resource_id}')">✓ Mark as "${PHASES[p.phase+1]}"</button>
+          <button onclick="markFailed('${p.resource_id}')" style="flex:none;border:1.5px solid rgba(217,115,90,.5);background:#fff;color:#8A3A22;cursor:pointer;font-family:'Plus Jakarta Sans';font-weight:700;font-size:13.5px;padding:9px 16px;border-radius:10px;">✗ Didn't work</button>
+        </div>
+        <div id="fail-${p.resource_id}" style="display:none;margin-top:12px;background:rgba(217,115,90,.07);border:1.5px solid rgba(217,115,90,.35);border-radius:12px;padding:14px;">
+          <div style="font-size:13px;font-weight:700;color:#0F3A3D;margin-bottom:4px;">Get caseworker support for this step</div>
+          <div style="font-size:12.5px;color:rgba(20,52,47,.65);margin-bottom:10px;">Leave a contact and a caseworker will follow up personally.</div>
+          <div style="font-size:12px;color:rgba(20,52,47,.5);margin-bottom:6px;">At least one is required.</div>
+          <input id="fail-phone-${p.resource_id}" type="tel" class="harbour-input" placeholder="Phone number" style="margin-bottom:8px;background:#fff;">
+          <input id="fail-email-${p.resource_id}" type="email" class="harbour-input" placeholder="Email address" style="margin-bottom:8px;background:#fff;">
+          <textarea id="fail-msg-${p.resource_id}" class="harbour-input" placeholder="What happened? (optional)" rows="2" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" style="margin-bottom:10px;background:#fff;resize:none;overflow:hidden;font-family:inherit;font-size:14px;line-height:1.5;"></textarea>
+          <button class="harbour-btn primary sm" onclick="submitFail('${p.resource_id}')">Request caseworker support</button>
+          <div id="fail-out-${p.resource_id}" style="font-size:12px;margin-top:6px;"></div>
+        </div>`
+      :'<div class="harbour-ok">✓ The loop closed — you received help</div>'}
+    </div>`;
+  }).join('');
+  document.getElementById('track-escalate').innerHTML='';
+}
+function advanceTrack(rid){const p=S.plan.find(x=>x.resource_id===rid);if(!p)return;p.phase=Math.min(p.phase+1,3);saveLocal();renderTracker();}
+function markFailed(rid){const el=document.getElementById('fail-'+rid);if(el)el.style.display=el.style.display==='none'?'block':'none';}
+async function submitFail(rid){
+  const phone=(document.getElementById('fail-phone-'+rid)||{}).value||'';
+  const email=(document.getElementById('fail-email-'+rid)||{}).value||'';
+  const msg=(document.getElementById('fail-msg-'+rid)||{}).value||'';
+  const out=document.getElementById('fail-out-'+rid);
+  if(!phone&&!email){out.innerHTML='<span style="color:#D9735A;">Please enter at least a phone number or email.</span>';return;}
+  const btns=document.querySelectorAll(`[onclick="submitFail('${rid}')"]`);
+  btns.forEach(b=>{b.disabled=true;b.textContent='Sending…';});
+  try{
+    await post('/api/checkin',{user_id:S.tracking||'anon',resource_id:rid,received_help:false,contact_phone:phone,contact_email:email,user_message:msg||'Step failed — needs caseworker follow-up'});
+    document.getElementById('fail-'+rid).innerHTML='<div class="harbour-ok" style="margin:0;">✓ Request queued with your contact details. Response timing depends on available staff.</div>';
+  }catch(e){
+    btns.forEach(b=>{b.disabled=false;b.textContent='Request caseworker support';});
+    if(out)out.innerHTML='<span style="color:#D9735A;">Could not send — check your connection.</span>';
+  }
+}
+function dismissPlan(rid){if(!confirm('Remove this program from your list?'))return;S.plan=S.plan.filter(x=>x.resource_id!==rid);saveLocal();renderTracker();if(S.tracking)post('/api/case/save',{tracking:S.tracking,plan:S.plan,email:S.email,organization_consent:S.organizationConsent});}
+function followMsg(p){
+  const steps=p.steps||[];
+  const bring=p.bring||'';
+  const hasPhone=!!p.phone;const hasHours=p.hours&&p.hours!=='Call for hours';
+  if(p.phase===0){
+    const s=steps[0]||`Visit ${p.name} to confirm availability.`;
+    const tip=hasPhone?`Call ahead first: <b>${p.phone}</b>`
+              :hasHours?`Open: ${p.hours}`
+              :'Call ahead to confirm they can receive you.';
+    return `<strong>Step 1 — Reach out:</strong> ${s}<br><span style="font-size:12.5px;opacity:.78;margin-top:4px;display:flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>${tip}</span>`;
+  }
+  if(p.phase===1){
+    const s=steps[1]||`Go in person to ${p.name} and submit your application.`;
+    const bringNote=bring?`Bring: <b>${bring}</b>`:'Ask the staff what documents you need.';
+    return `<strong>Step 2 — Apply:</strong> ${s}<br><span style="font-size:12.5px;opacity:.78;margin-top:4px;display:flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>${bringNote}</span>`;
+  }
+  if(p.phase===2){
+    const s=steps[2]||'Wait for confirmation. Follow up if you haven\'t heard back in a few days.';
+    const followUp=hasPhone?`If you don't hear back in 3–5 days, call them: <b>${p.phone}</b>`
+                  :'If you don\'t hear back in 3–5 days, visit in person or contact a caseworker.';
+    return `<strong>Step 3 — Wait for confirmation:</strong> ${s}<br><span style="font-size:12.5px;opacity:.78;margin-top:4px;display:flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>${followUp}</span>`;
+  }
+  return '<strong>Step 4 — Help received.</strong> The loop closed — exactly what Harbour measures.';
+}
+
+const _ZONE_LL=[[29.57,-95.65],[29.57,-95.25],[29.73,-95.65],[29.73,-95.25],[29.89,-95.65],[29.89,-95.25]];
+function _resLL(r,fallback){if(r.lat&&r.lon)return[parseFloat(r.lat),parseFloat(r.lon)];return _ZONE_LL[Math.min(r.zip_zone||0,5)]||fallback;}
+async function renderMap(){
+  const center=S.coords||[29.7604,-95.3698];
+  if(!pmap){pmap=L.map('pmap').setView(center,13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(pmap);}
+  else{pmap.setView(center,13);pmap.eachLayer(l=>{if(l instanceof L.CircleMarker||l instanceof L.Marker)pmap.removeLayer(l);});}
+
+  // Layer 1 — other relevant resources (fetched from API)
+  let allRes=[];
+  try{const d=await fetch('/api/organization/resources').then(r=>r.json());allRes=d.resources||[];}catch(e){}
+  const matchedIds=new Set(S.plan.map(p=>p.resource_id));
+  const userNeeds=new Set((S.intake&&S.intake.needs)||[]);
+  allRes.forEach(r=>{
+    if(matchedIds.has(r.resource_id))return;
+    if(userNeeds.size&&!userNeeds.has(r.service_type))return;
+    const ll=_resLL(r,center);
+    L.circleMarker(ll,{radius:7,color:'#fff',weight:2,fillColor:'#3FA6A0',fillOpacity:.85})
+      .addTo(pmap).bindPopup(`<b>${r.name}</b><br><span style="text-transform:capitalize;">${r.service_type}</span>${r.address?'<br>'+r.address:''}`);
+  });
+
+  // Layer 2 — matched resources (from S.plan)
+  S.plan.forEach(p=>{
+    const raw=allRes.find(x=>x.resource_id===p.resource_id)||{zip_zone:p.zone||0};
+    const ll=p.resource_id&&raw.lat?[parseFloat(raw.lat),parseFloat(raw.lon)]:_ZONE_LL[Math.min(p.zone||0,5)]||center;
+    L.circleMarker(ll,{radius:11,color:'#fff',weight:2.5,fillColor:'#0F3A3D',fillOpacity:1})
+      .addTo(pmap).bindPopup(`<b>${p.name}</b><br><span style="text-transform:capitalize;">${p.service}</span>${p.address?'<br>'+p.address:''}`);
+  });
+
+  // Layer 3 — user location (always on top, drawn last)
+  L.circleMarker(center,{radius:12,color:'#fff',weight:2.5,fillColor:'#E8A04C',fillOpacity:1})
+    .addTo(pmap).bindPopup('<b>Your location</b>');
+
+  setTimeout(()=>pmap.invalidateSize(),200);
+}
+
+function toggleChat(){document.getElementById('chat-panel').classList.toggle('open');if(!S.chatReady){bootChat();S.chatReady=true;}}
+function bootChat(){
+  const q=['What do I do first?','What should I bring?','Is my information safe?','What if a place is closed?','How long does it take?','Can I get help without ID?','What if I don\'t speak English?','Can I bring my kids?','What if the center is full?','How does Harbour work?'];
+  appendChatBot('Hi, I\'m here to help with your plan. What would you like to know?');
+  document.getElementById('chat-chips').innerHTML=q.map(s=>`<button onclick="askChat('${s.replace(/'/g,"\\'")}')">${s}</button>`).join('');
+}
+function appendChatBot(t){const b=document.getElementById('chat-body');b.innerHTML+=`<div class="chat-msg-bot">${t}</div>`;b.scrollTop=b.scrollHeight;}
+function appendChatMe(t){const b=document.getElementById('chat-body');b.innerHTML+=`<div class="chat-msg-me">${t}</div>`;b.scrollTop=b.scrollHeight;}
+function sendChat(){const i=document.getElementById('chat-in');if(!i.value.trim())return;askChat(i.value.trim());i.value='';}
+async function askChat(q){
+  appendChatMe(q);
+  const typing=document.createElement('div');typing.className='chat-msg-bot';typing.textContent='…';
+  document.getElementById('chat-body').appendChild(typing);
+  try{const r=await post('/api/chat',{message:q,plan:S.plan,tracking:S.tracking||'',language:(S.intake&&S.intake.language)||'English'});typing.innerHTML=r.reply;}
+  catch(e){typing.textContent='Having trouble right now — please try again in a moment.';}
+  document.getElementById('chat-body').scrollTop=99999;
+}
+
+function pickOrganizationService(btn){document.querySelectorAll('#organization-service-chips .need-btn').forEach(x=>x.classList.remove('sel'));btn.classList.add('sel');S.organizationService=btn.dataset.s;}
+async function organizationRegister(){
+  const out=document.getElementById('organization-reg-out');
+  const name=document.getElementById('organization-name').value.trim();
+  const address=document.getElementById('organization-address').value.trim();
+  const hours=document.getElementById('organization-hours').value.trim();
+  const cap=+document.getElementById('organization-cap').value||0;
+  if(!name||!address||!hours){
+    out.innerHTML='<span style="color:#D9735A;font-size:13px;">Please fill in the required fields (name, address, hours).</span>';
+    return;
+  }
+  const phone=document.getElementById('organization-phone').value.trim();
+  const email=document.getElementById('organization-email').value.trim();
+  const url=document.getElementById('organization-url').value.trim();
+  const zip_zone=+document.getElementById('organization-zone').value;
+  const max_income=+document.getElementById('organization-income').value||0;
+  const min_household_size=+document.getElementById('organization-household').value||0;
+  out.innerHTML='<span style="color:rgba(20,52,47,.5);font-size:13px;">Saving…</span>';
+  try{
+    const r=await post('/api/organization/register',{name,service_type:S.organizationService,address,phone,email,url,hours,zip_zone,capacity:cap,max_income,min_household_size});
+    out.innerHTML=`<div class="harbour-ok" style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M5 12l4 4 10-10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>${r.message}</div>`;
+  }catch(e){
+    out.innerHTML='<span style="color:#D9735A;font-size:13px;">Could not save — check your connection and try again.</span>';
+  }
+}
+let orgLoaded=false;
+async function loadOrg(){
+  if(orgLoaded){setTimeout(()=>{if(omap)omap.invalidateSize();},200);return;}
+  orgLoaded=true;
+  const d=await get('/api/dashboard');
+  const stillWithout=d.still_without_help||0;
+  const unmatched=d.unmatched||0;
+  const svcBars=Object.entries(d.closure_by_service||{}).map(([s,v])=>{
+    const pct=Math.round((v.closure_rate||0)*100);
+    const barColor=pct>=80?'#1B7A7E':pct>=65?'#E8A04C':'#D9735A';
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+      <span style="width:96px;font-size:13px;font-weight:600;color:#0F3A3D;text-transform:capitalize;">${s}</span>
+      <div style="flex:1;background:#E9F5F4;border-radius:6px;height:8px;overflow:hidden;">
+        <div style="width:${pct}%;background:${barColor};border-radius:6px;height:8px;transition:width .6s ease;"></div>
+      </div>
+      <span style="font-size:12.5px;font-weight:700;color:${barColor};width:34px;text-align:right;">${pct}%</span>
+      <span style="font-size:12px;color:rgba(20,52,47,.5);">${v.assigned} assigned</span>
+    </div>`;
+  }).join('');
+  document.getElementById('organization-kpis').innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi-box"><b>${d.people_matched}<span style="font-size:13px;font-weight:600;color:rgba(20,52,47,.5);"> / ${d.total_people}</span></b><small>people matched</small></div>
+      <div class="kpi-box"><b>${d.confirmed_help}</b><small>confirmed received</small></div>
+      <div class="kpi-box"><b style="color:${stillWithout>0?'#D9735A':'#1B7A7E'};">${stillWithout}</b><small>still without help</small></div>
+      <div class="kpi-box"><b style="color:${unmatched>0?'#E8A04C':'#1B7A7E'};">${unmatched}</b><small>no resource found</small></div>
+    </div>
+    <div style="margin-top:20px;">
+      <div style="margin-bottom:10px;">
+        <span class="harbour-sublabel" style="margin-bottom:0;">Confirmed help by service</span>
+      </div>
+      <div>${svcBars}</div>
+    </div>`;
+  const fc=await get('/api/forecast');
+  if(!omap){omap=L.map('organization-map').setView([29.7604,-95.3698],12);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(omap);}
+  const colr={high:'#D9735A',mid:'#E8A04C',ok:'#1B7A7E'};
+  const ZONE_NAMES=['Southwest district','Southeast district','West district','Central district','Northwest district','Northeast district'];
+  const SVC_SVG={
+    food:`<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>`,
+    housing:`<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>`,
+    healthcare:`<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>`,
+    childcare:`<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`,
+    employment:`<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>`,
+  };
+  fc.zones_map.forEach(z=>{L.circleMarker([z.lat,z.lng],{radius:14+Math.max(0,z.max_gap),color:colr[z.level],fillColor:colr[z.level],fillOpacity:.55}).addTo(omap).bindPopup(`<b>${ZONE_NAMES[z.zone]}</b><br>max scarcity gap +${z.max_gap}`);});
+  setTimeout(()=>omap.invalidateSize(),250);
+  const top=(fc.shortfalls||[]).slice(0,6);
+  document.getElementById('forecast-shortfalls').innerHTML=top.length?top.map(r=>{
+    const lvl=r.status==='shortfall'?'#D9735A':'#E8A04C';
+    const label=r.service.charAt(0).toUpperCase()+r.service.slice(1);
+    const icon=`<span style="display:inline-flex;align-items:center;color:rgba(20,52,47,.5);">${SVC_SVG[r.service]||''}</span>`;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(20,52,47,.08);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:${lvl};flex:none;"></span>
+        <div>
+          <div style="font-size:13.5px;font-weight:700;color:#0F3A3D;">${ZONE_NAMES[r.zone]||'Zone '+r.zone}</div>
+          <div style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:rgba(20,52,47,.55);">${icon}${label}</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:13px;font-weight:700;color:${lvl};">+${r.gap} slots needed</div>
+        <div style="font-size:11px;color:rgba(20,52,47,.45);">pred ${r.predicted_demand} · cap ${r.current_capacity}</div>
+      </div>
+    </div>`;
+  }).join(''):'<div style="font-size:13px;color:rgba(20,52,47,.5);">All zones adequately stocked.</div>';
+  runMilp();
+}
+async function runMilp(){
+  document.getElementById('milp-sim').innerHTML='<div class="spinner">Running the solver…</div>';
+  const d=await get('/api/batch/run');
+  _milpData=d;
+  const cls=g=>g==='Central District'?'#1B7A7E':'#E8A04C';
+  function grid(w){return d.people.map(p=>{const s=p[w]!=null;return `<span class="milp-sq" style="background:${cls(p.group)};opacity:${s?'1':'.28'};" title="${p.group}${s?' → served':' → unserved'}"></span>`;}).join('');}
+  const nI=Math.round((d.naive.by_group['Central District']||0)*100),nO=Math.round((d.naive.by_group['Outer District']||0)*100);
+  const fI=Math.round((d.fair.by_group['Central District']||0)*100),fO=Math.round((d.fair.by_group['Outer District']||0)*100);
+  document.getElementById('milp-sim').innerHTML=`
+    <div style="font-size:12.5px;font-weight:700;color:rgba(20,52,47,.6);margin-bottom:14px;">${d.people.length} households · ${d.resources.reduce((a,r)=>a+r.capacity,0)} slots across ${d.resources.length} sites · demonstration service area</div>
+    <div class="milp-cols">
+      <div class="milp-side L"><div class="mh">Naive (greedy)</div>
+        <div class="milp-ppl">${grid('naive')}</div>
+        <div style="font-size:12px;color:rgba(20,52,47,.8);margin-bottom:5px;">Central District ${nI}% · Outer District ${nO}%</div>
+        <div class="milp-gap">${Math.round(d.naive.parity_gap*100)}% gap</div>
+      </div>
+      <div class="milp-side R"><div class="mh">Fair (MILP + parity)</div>
+        <div class="milp-ppl">${grid('fair')}</div>
+        <div style="font-size:12px;color:rgba(20,52,47,.8);margin-bottom:5px;">Central District ${fI}% · Outer District ${fO}%</div>
+        <div class="milp-gap">${Math.round(d.fair.parity_gap*100)}% gap</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;font-size:12px;font-weight:600;color:rgba(20,52,47,.82);margin-bottom:12px;">
+      <span style="display:inline-flex;align-items:center;gap:7px;"><span style="width:13px;height:13px;border-radius:3px;background:#1B7A7E;display:inline-block;"></span>Central District</span>
+      <span style="display:inline-flex;align-items:center;gap:7px;"><span style="width:13px;height:13px;border-radius:3px;background:#E8A04C;display:inline-block;"></span>Outer District</span>
+      <span style="display:inline-flex;align-items:center;gap:7px;"><span style="width:13px;height:13px;border-radius:3px;background:#E8A04C;opacity:.28;display:inline-block;"></span>faded = unserved</span>
+    </div>
+    <p style="font-size:12.5px;line-height:1.55;color:rgba(20,52,47,.65);">${d.explain}</p>
+    <button onclick="downloadAssignments()" style="margin-top:14px;border:1.5px solid rgba(20,52,47,.3);background:#ffffff;color:#0F3A3D;cursor:pointer;font-family:'Plus Jakarta Sans';font-weight:700;font-size:13px;padding:10px 18px;border-radius:10px;">Download assignment report (.csv)</button>`;
+}
+
+function downloadAssignments(){
+  if(!_milpData) return;
+  const rn = _milpData.resource_names || {};
+  const rows = [
+    ['Case ID','Group','Urgency','Has Transport','Zone',
+     'Naive Assignment','Fair Assignment','Changed']
+  ];
+  for(const p of _milpData.people){
+    const naiveName = p.naive ? (rn[p.naive] || p.naive) : 'Unassigned';
+    const fairName  = p.fair  ? (rn[p.fair]  || p.fair)  : 'Unassigned';
+    const changed   = naiveName !== fairName ? 'YES' : 'no';
+    rows.push([
+      p.id, p.group, p.urgency,
+      p.transport ? 'Yes' : 'No',
+      p.zone,
+      naiveName, fairName, changed
+    ]);
+  }
+  rows.push([]);
+  rows.push(['','','','','',
+    `Naive served: ${_milpData.naive.served}/${_milpData.naive.total}  gap ${Math.round(_milpData.naive.parity_gap*100)}%`,
+    `Fair served: ${_milpData.fair.served}/${_milpData.fair.total}  gap ${Math.round(_milpData.fair.parity_gap*100)}%`,
+    ''
+  ]);
+  const csv = rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a   = document.createElement('a');
+  a.href    = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download= 'harbour_fair_assignment_report.csv';
+  a.click();
+}
+const CW_COLOR=g=>g>=100?'#D9735A':g>=40?'#E8A04C':'#1B7A7E';
+const CW_TAGBG=r=>r==='safety'?'#F7D9D0':r==='broken_loop'?'#F6E2C4':'#D4E9E8';
+const CW_TAGFG=r=>r==='safety'?'#8A3020':r==='broken_loop'?'#7A5010':'#155F62';
+let _milpData=null;
+let pendingResolve=null;
+async function loadCw(){
+  const d=await get('/api/caseworker/dashboard');
+  const s=d.stats;
+  const statItems=[
+    {n:String(s.total),label:'total cases',color:'#0F3A3D'},
+    {n:String(s.open),label:'open',color:'#C05040'},
+    {n:String(s.resolved),label:'resolved',color:'#0F3A3D'},
+    {n:Math.round(s.resolution_rate*100)+'%',label:'resolution rate',color:'#1B7A7E'}
+  ];
+  document.getElementById('cw-stats').innerHTML=statItems.map(x=>`<div style="background:#ffffff;border:1px solid rgba(20,52,47,.18);border-radius:16px;padding:20px;text-align:center;"><div style="font-family:'Fraunces',serif;font-size:34px;font-weight:500;color:${x.color};line-height:1;">${x.n}</div><div style="font-size:13px;font-weight:600;color:rgba(20,52,47,.72);margin-top:8px;">${x.label}</div></div>`).join('');
+  const q=d.queue||[];
+  if(!q.length){document.getElementById('cw-queue').innerHTML='<div class="harbour-ok">✓ Queue empty — all escalations resolved.</div>';}
+  else{
+    document.getElementById('cw-queue').innerHTML=q.map((c,i)=>`
+      <div class="cw-row">
+        <span class="cw-badge" style="background:${CW_COLOR(c.vulnerability)};"><span class="cb1">${i===0?'NOW':'#'+(i+1)}</span><span class="cb2">p${c.vulnerability}</span></span>
+        <div class="cw-main">
+          <h4>${c.summary}${c.has_children?' · has children':''}</h4>
+          <div class="meta">case ${c.id} · ${c.user_hash} · ${c.urgency} · ${c.language}</div>
+          <span class="cw-tag" style="background:${CW_TAGBG(c.reason)};color:${CW_TAGFG(c.reason)};">${c.reason_label}</span>
+        </div>
+        <button onclick="openResolve('${c.id}')" style="flex:none;align-self:center;border:1.5px solid rgba(20,52,47,.45);background:#ffffff;color:#0F3A3D;cursor:pointer;font-family:'Plus Jakarta Sans';font-weight:700;font-size:14px;padding:10px 16px;border-radius:11px;display:inline-flex;align-items:center;gap:7px;">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M5 12l4 4 10-10" stroke="#0F3A3D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          Resolve
+        </button>
+      </div>`).join('');
+  }
+  const rs=d.resolved||[];
+  document.getElementById('cw-resolved').innerHTML=rs.length?rs.map(c=>`
+    <div style="display:flex;align-items:flex-start;gap:14px;background:#F4F1EA;border:1px solid rgba(20,52,47,.15);border-radius:16px;padding:16px 18px;margin-bottom:10px;">
+      <span style="flex:none;width:42px;height:42px;border-radius:12px;background:#1B7A7E;color:#fff;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+      <div>
+        <div style="font-weight:700;font-size:15px;color:#0F3A3D;margin-bottom:4px;">${c.summary}</div>
+        <div style="font-size:12.5px;color:rgba(20,52,47,.6);margin-bottom:8px;">case ${c.id} · ${c.language} · was: ${c.reason_label}</div>
+        <span style="display:inline-block;background:#D4E9E8;color:#155F62;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;">Referred to: ${c.referred_to||'Direct assistance'}</span>
+      </div>
+    </div>`).join(''):'<div style="font-size:13px;color:rgba(20,52,47,.5);">No resolved cases yet.</div>';
+}
+function openResolve(id){pendingResolve=id;document.getElementById('resolveModal').style.display='flex';}
+function closeResolve(){pendingResolve=null;document.getElementById('resolveModal').style.display='none';}
+async function confirmResolve(){
+  if(!pendingResolve)return;
+  const organization=document.getElementById('resolveOrganization').value;
+  await post('/api/caseworker/resolve',{case_id:pendingResolve,referred_to:organization});
+  closeResolve();loadCw();
+}
+
+const DEMO_CREDS={'org@harbour.local':{pwd:'harbour-demo',role:'org'},'caseworker@harbour.local':{pwd:'harbour-demo',role:'caseworker'}};
+function loginOrg(){
+  const email=document.getElementById('org-email').value.trim().toLowerCase();
+  const pwd=document.getElementById('org-pwd').value;
+  const err=document.getElementById('org-err');
+  if(!email||!pwd){err.textContent='Enter your email and password.';err.style.display='block';return;}
+  const m=DEMO_CREDS[email];
+  if(!m||m.role!=='org'||m.pwd!==pwd){err.textContent='Incorrect email or password.';err.style.display='block';document.getElementById('org-pwd').value='';return;}
+  err.style.display='none';
+  document.getElementById('org-login').style.display='none';document.getElementById('org-dash').style.display='block';
+  document.getElementById('world-org').style.flexDirection='column';document.getElementById('world-org').style.alignItems='stretch';loadOrg();
+}
+function logoutOrg(){document.getElementById('org-login').style.display='block';document.getElementById('org-dash').style.display='none';document.getElementById('world-org').style.flexDirection='';document.getElementById('world-org').style.alignItems='';document.getElementById('org-email').value='';document.getElementById('org-pwd').value='';}
+function loginCw(){
+  const email=document.getElementById('cw-email').value.trim().toLowerCase();
+  const pwd=document.getElementById('cw-pwd').value;
+  const err=document.getElementById('cw-err');
+  if(!email||!pwd){err.textContent='Enter your email and password.';err.style.display='block';return;}
+  const m=DEMO_CREDS[email];
+  if(!m||m.role!=='caseworker'||m.pwd!==pwd){err.textContent='Incorrect email or password.';err.style.display='block';document.getElementById('cw-pwd').value='';return;}
+  err.style.display='none';
+  document.getElementById('cw-login').style.display='none';document.getElementById('cw-dash').style.display='block';
+  document.getElementById('world-cw').style.flexDirection='column';document.getElementById('world-cw').style.alignItems='stretch';loadCw();
+}
+function logoutCw(){document.getElementById('cw-login').style.display='block';document.getElementById('cw-dash').style.display='none';document.getElementById('world-cw').style.flexDirection='';document.getElementById('world-cw').style.alignItems='';document.getElementById('cw-email').value='';document.getElementById('cw-pwd').value='';}
+
+loadLocal();askGeo();
+document.getElementById('bottomnav').style.display='flex';
+document.getElementById('chat-fab').style.display='flex';
+</script>
+</body>
+</html>

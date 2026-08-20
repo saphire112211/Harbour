@@ -1,0 +1,427 @@
+{
+  "source": "seed",
+  "schema": "openreferral-hsds-3.0",
+  "count": 21,
+  "resources": [
+    {
+      "resource_id": "R0000",
+      "name": "Central Community Food Hub",
+      "service_type": "food",
+      "address": "9271 Lake Road",
+      "phone": "(555) 720-4111",
+      "hours": "Apply online",
+      "url": "https://findhelp.example.org/program/central-community-food-hub",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 3,
+      "capacity": 17,
+      "max_income": 3000,
+      "min_household_size": 0,
+      "last_verified_days_ago": 12,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0001",
+      "name": "Southwest Community Pantry",
+      "service_type": "food",
+      "address": "5070 River Road",
+      "phone": "(555) 751-1686",
+      "hours": "Mon-Fri 9-5",
+      "url": "https://findhelp.example.org/program/southwest-community-pantry",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 3,
+      "capacity": 44,
+      "max_income": 3000,
+      "min_household_size": 2,
+      "last_verified_days_ago": 20,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0002",
+      "name": "Open Door Food Pantry",
+      "service_type": "food",
+      "address": "345 Center Boulevard",
+      "phone": "(555) 260-1584",
+      "hours": "Mon-Fri 9-5",
+      "url": "https://findhelp.example.org/program/open-door-food-pantry",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 4,
+      "capacity": 18,
+      "max_income": 1600,
+      "min_household_size": 0,
+      "last_verified_days_ago": 59,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0003",
+      "name": "Northside Food Shelf",
+      "service_type": "food",
+      "address": "7317 North Street",
+      "phone": "(555) 731-4828",
+      "hours": "Daily 8-8",
+      "url": "https://findhelp.example.org/program/northside-food-shelf",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 2,
+      "capacity": 24,
+      "max_income": 3000,
+      "min_household_size": 0,
+      "last_verified_days_ago": 10,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0004",
+      "name": "Family Support Food Shelf",
+      "service_type": "food",
+      "address": "4657 Hill Avenue",
+      "phone": "(555) 285-5161",
+      "hours": "Tue/Thu 9-1",
+      "url": "https://findhelp.example.org/program/family-support-food-shelf",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 3,
+      "capacity": 26,
+      "max_income": 1600,
+      "min_household_size": 0,
+      "last_verified_days_ago": 3,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0005",
+      "name": "Neighborhood Table",
+      "service_type": "food",
+      "address": "9326 Oak Avenue",
+      "phone": "(555) 310-5766",
+      "hours": "Apply online",
+      "url": "https://findhelp.example.org/program/neighborhood-table",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 0,
+      "capacity": 30,
+      "max_income": 0,
+      "min_household_size": 0,
+      "last_verified_days_ago": 0,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0006",
+      "name": "Community Rent Relief",
+      "service_type": "housing",
+      "address": "3536 Main Street",
+      "phone": "(555) 584-7511",
+      "hours": "Apply online",
+      "url": "https://findhelp.example.org/program/community-rent-relief",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 1,
+      "capacity": 32,
+      "max_income": 0,
+      "min_household_size": 0,
+      "last_verified_days_ago": 34,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0007",
+      "name": "Affordable Housing Assistance",
+      "service_type": "housing",
+      "address": "1527 Park Lane",
+      "phone": "(555) 215-7718",
+      "hours": "Mon-Sat 10-4",
+      "url": "https://findhelp.example.org/program/affordable-housing-assistance",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 2,
+      "capacity": 13,
+      "max_income": 1600,
+      "min_household_size": 0,
+      "last_verified_days_ago": 12,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0008",
+      "name": "Central Emergency Shelter",
+      "service_type": "housing",
+      "address": "1081 Lake Road",
+      "phone": "(555) 381-4086",
+      "hours": "Apply online",
+      "url": "https://findhelp.example.org/program/central-emergency-shelter",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 0,
+      "capacity": 34,
+      "max_income": 1600,
+      "min_household_size": 0,
+      "last_verified_days_ago": 53,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0009",
+      "name": "Family Support Lodge",
+      "service_type": "housing",
+      "address": "6387 Oak Avenue",
+      "phone": "(555) 630-4487",
+      "hours": "Apply online",
+      "url": "https://findhelp.example.org/program/family-support-lodge",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 5,
+      "capacity": 6,
+      "max_income": 2200,
+      "min_household_size": 0,
+      "last_verified_days_ago": 2,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0010",
+      "name": "Community Health Center",
+      "service_type": "healthcare",
+      "address": "3168 Hill Avenue",
+      "phone": "(555) 857-2643",
+      "hours": "Tue/Thu 9-1",
+      "url": "https://findhelp.example.org/program/community-health-center",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 1,
+      "capacity": 8,
+      "max_income": 1600,
+      "min_household_size": 0,
+      "last_verified_days_ago": 56,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0011",
+      "name": "Public Health Clinic",
+      "service_type": "healthcare",
+      "address": "256 North Street",
+      "phone": "(555) 503-7327",
+      "hours": "Mon-Sat 10-4",
+      "url": "https://findhelp.example.org/program/public-health-clinic",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 2,
+      "capacity": 10,
+      "max_income": 0,
+      "min_household_size": 0,
+      "last_verified_days_ago": 26,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0012",
+      "name": "Neighborhood Health and Wellness",
+      "service_type": "healthcare",
+      "address": "4081 Main Street",
+      "phone": "(555) 577-7089",
+      "hours": "Tue/Thu 9-1",
+      "url": "https://findhelp.example.org/program/neighborhood-health-and-wellness",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 4,
+      "capacity": 45,
+      "max_income": 3000,
+      "min_household_size": 0,
+      "last_verified_days_ago": 61,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0013",
+      "name": "Community Care Clinic",
+      "service_type": "healthcare",
+      "address": "2323 Hill Avenue",
+      "phone": "(555) 842-3525",
+      "hours": "Daily 8-8",
+      "url": "https://findhelp.example.org/program/community-care-clinic",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 4,
+      "capacity": 25,
+      "max_income": 1600,
+      "min_household_size": 0,
+      "last_verified_days_ago": 24,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0014",
+      "name": "Community Childcare Network",
+      "service_type": "childcare",
+      "address": "9175 Market Street",
+      "phone": "(555) 694-2286",
+      "hours": "Apply online",
+      "url": "https://findhelp.example.org/program/community-childcare-network",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 1,
+      "capacity": 32,
+      "max_income": 0,
+      "min_household_size": 0,
+      "last_verified_days_ago": 13,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0015",
+      "name": "Early Learning Center",
+      "service_type": "childcare",
+      "address": "8494 Park Lane",
+      "phone": "(555) 957-7416",
+      "hours": "Daily 8-8",
+      "url": "https://findhelp.example.org/program/early-learning-center",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 0,
+      "capacity": 22,
+      "max_income": 3000,
+      "min_household_size": 2,
+      "last_verified_days_ago": 37,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0016",
+      "name": "Community Child Development Center",
+      "service_type": "childcare",
+      "address": "2974 Oak Avenue",
+      "phone": "(555) 433-8852",
+      "hours": "Daily 8-8",
+      "url": "https://findhelp.example.org/program/community-child-development-center",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 4,
+      "capacity": 41,
+      "max_income": 0,
+      "min_household_size": 0,
+      "last_verified_days_ago": 27,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0017",
+      "name": "Regional Workforce Center",
+      "service_type": "employment",
+      "address": "371 Oak Avenue",
+      "phone": "(555) 621-8302",
+      "hours": "Mon-Sat 10-4",
+      "url": "https://findhelp.example.org/program/regional-workforce-center",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 1,
+      "capacity": 21,
+      "max_income": 0,
+      "min_household_size": 0,
+      "last_verified_days_ago": 22,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0018",
+      "name": "Community Career Center",
+      "service_type": "employment",
+      "address": "6142 Center Boulevard",
+      "phone": "(555) 334-2510",
+      "hours": "Tue/Thu 9-1",
+      "url": "https://findhelp.example.org/program/community-career-center",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 2,
+      "capacity": 29,
+      "max_income": 1600,
+      "min_household_size": 2,
+      "last_verified_days_ago": 42,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0019",
+      "name": "Community Job Connection",
+      "service_type": "employment",
+      "address": "8651 North Street",
+      "phone": "(555) 804-1574",
+      "hours": "Daily 8-8",
+      "url": "https://findhelp.example.org/program/community-job-connection",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 5,
+      "capacity": 7,
+      "max_income": 3000,
+      "min_household_size": 0,
+      "last_verified_days_ago": 39,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    },
+    {
+      "resource_id": "R0020",
+      "name": "Multicultural Employment Services",
+      "service_type": "employment",
+      "address": "448 North Street",
+      "phone": "(555) 693-2102",
+      "hours": "Mon-Fri 9-5",
+      "url": "https://findhelp.example.org/program/multicultural-employment-services",
+      "lat": null,
+      "lon": null,
+      "zip_zone": 0,
+      "capacity": 25,
+      "max_income": 2200,
+      "min_household_size": 0,
+      "last_verified_days_ago": 9,
+      "hsds": {
+        "schema": "openreferral-hsds-3.0",
+        "status": "active"
+      }
+    }
+  ]
+}

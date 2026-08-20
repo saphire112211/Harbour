@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: harbour-benefits-navigator
+    runtime: python
+    rootDir: harbour-app
+    buildCommand: "pip install -r requirements.txt && python scraper.py --seed"
+    startCommand: "uvicorn app:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
+    envVars:
+      - key: SUPABASE_URL
+        value: https://etpydjcmyjhqmiblkofr.supabase.co
+      - key: SUPABASE_KEY
+        sync: false

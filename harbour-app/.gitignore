@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+gemini_key.txt
+data/cases.json
+data/escalations.json
+.env
