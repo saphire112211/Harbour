@@ -6,7 +6,7 @@ Harbour is an independently developed public-benefits navigator. It turns a pers
 
 Repository: <https://github.com/jawaharlaldoon-bit/Harbour>
 
-Live demo: <https://harbour-benefits-navigator.onrender.com>
+Live demo: <https://harbour-benefits-navigator.vercel.app>
 
 ## What Harbour does
 
@@ -98,4 +98,7 @@ These credentials are not production authentication. Production access requires 
 
 ## Deployment
 
-The repository-root `render.yaml` is ready for a Render Blueprint deployment. Add optional environment variables through the hosting provider rather than committing secrets.
+The production demo runs on Vercel using `harbour-app/vercel.json` and
+`harbour-app/api/index.py`. The repository-root `render.yaml` remains available
+as an optional Render deployment. Configure environment variables through the
+hosting provider rather than committing secrets.
